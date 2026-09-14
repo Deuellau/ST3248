@@ -1,0 +1,121 @@
+\chapter{The Bias--Variance Decomposition}
+\label{ch:biasvar}
+
+This chapter demonstrates how to write mathematics in these notes ---
+numbered single-line equations, multi-line derivations, and referring
+back to earlier equations and results --- using the classic
+bias--variance decomposition as the running example.
+
+\section{Setup}
+
+Let $\theta$ be an unknown parameter and let $\hat\theta = \hat\theta(X_1,\dots,X_n)$
+be an estimator of $\theta$ based on a sample $X_1,\dots,X_n$. Since
+$\hat\theta$ is a function of random data, it is itself a random variable,
+with its own mean and spread.
+
+
+\begin{definition}[Bias]
+\label{def:bias}
+The \textbf{bias} of $\hat\theta$ as an estimator of $\theta$ is
+\begin{equation}
+\label{eq:bias-def}
+\operatorname{Bias}(\hat\theta) = \mathbb{E}[\hat\theta] - \theta.
+\end{equation}
+We say $\hat\theta$ is \textbf{unbiased} if $\operatorname{Bias}(\hat\theta) = 0$,
+i.e.\ if $\mathbb{E}[\hat\theta] = \theta$.
+\end{definition}
+
+\begin{definition}[Variance]
+\label{def:variance}
+The \textbf{variance} of $\hat\theta$ is
+\begin{equation}
+\label{eq:var-def}
+\operatorname{Var}(\hat\theta) = \mathbb{E}\big[(\hat\theta - \mathbb{E}[\hat\theta])^2\big].
+\end{equation}
+\end{definition}
+
+We judge how good $\hat\theta$ is as an estimator of $\theta$ by its
+\textbf{mean squared error} (MSE),
+\begin{equation}
+\label{eq:mse-def}
+\operatorname{MSE}(\hat\theta) = \mathbb{E}\big[(\hat\theta - \theta)^2\big].
+\end{equation}
+
+\section{The Decomposition}
+
+\begin{proposition}[Bias--variance decomposition]
+\label{prop:biasvar}
+For any estimator $\hat\theta$ of $\theta$,
+\begin{equation}
+\label{eq:biasvar}
+\operatorname{MSE}(\hat\theta) = \operatorname{Var}(\hat\theta) + \operatorname{Bias}(\hat\theta)^2.
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+Write $\mu = \mathbb{E}[\hat\theta]$ and add and subtract $\mu$ inside the
+square in~\eqref{eq:mse-def}:
+\begin{align}
+\operatorname{MSE}(\hat\theta)
+  &= \mathbb{E}\big[(\hat\theta - \theta)^2\big] \notag\\
+  &= \mathbb{E}\big[\big((\hat\theta - \mu) + (\mu - \theta)\big)^2\big] \notag\\
+  &= \mathbb{E}\big[(\hat\theta - \mu)^2\big]
+     + 2(\mu - \theta)\,\mathbb{E}[\hat\theta - \mu]
+     + (\mu - \theta)^2. \label{eq:biasvar-expand}
+\end{align}
+The middle term in \eqref{eq:biasvar-expand} vanishes, because
+$\mathbb{E}[\hat\theta - \mu] = \mathbb{E}[\hat\theta] - \mu = 0$ by
+definition of $\mu$. The first term is $\operatorname{Var}(\hat\theta)$
+by \eqref{eq:var-def}, and the last term is $\operatorname{Bias}(\hat\theta)^2$
+by \eqref{eq:bias-def}, since $\mu - \theta = \operatorname{Bias}(\hat\theta)$.
+This gives \eqref{eq:biasvar}.
+\end{proof}
+
+\begin{remark}
+\label{rem:tradeoff}
+Proposition~\ref{prop:biasvar} is the reason for the name
+\emph{bias--variance tradeoff}: an estimator with zero bias can still
+have large MSE if its variance is large, and an estimator with small
+variance can still have large MSE if it is badly biased. Choosing a good
+estimator (or, later in the course, a good model) usually means trading
+some bias for a larger reduction in variance, or vice versa, rather than
+minimizing either term alone.
+\end{remark}
+
+\section{A Worked Example: Estimating a Variance}
+
+\begin{example}
+\label{ex:sample-var}
+Let $X_1,\dots,X_n$ be i.i.d.\ with mean $\mu$ and variance $\sigma^2$,
+and let $\bar X = \tfrac{1}{n}\sum_{i=1}^n X_i$. Consider the two
+estimators of $\sigma^2$,
+\begin{equation}
+\label{eq:s2biased}
+\hat\sigma^2_n = \frac{1}{n}\sum_{i=1}^n (X_i - \bar X)^2,
+\qquad
+S^2 = \frac{1}{n-1}\sum_{i=1}^n (X_i - \bar X)^2.
+\end{equation}
+A standard calculation shows
+\begin{equation}
+\label{eq:s2biased-mean}
+\mathbb{E}\big[\hat\sigma^2_n\big] = \frac{n-1}{n}\,\sigma^2,
+\end{equation}
+so that, by Definition~\ref{def:bias},
+\begin{equation}
+\operatorname{Bias}(\hat\sigma^2_n) = \frac{n-1}{n}\sigma^2 - \sigma^2 = -\frac{\sigma^2}{n},
+\end{equation}
+which is nonzero but $\to 0$ as $n \to \infty$: $\hat\sigma^2_n$ is
+\emph{biased} but \emph{asymptotically unbiased}. In contrast,
+$S^2 = \tfrac{n}{n-1}\hat\sigma^2_n$ satisfies $\mathbb{E}[S^2] = \sigma^2$
+exactly, i.e.\ $S^2$ is unbiased for every $n$ -- this is precisely why
+the sample variance is conventionally defined with $n-1$ in the
+denominator rather than $n$.
+\end{example}
+
+\begin{remark}
+Example~\ref{ex:sample-var} is a useful sanity check when you meet a new
+estimator: an unbiased estimator is not automatically the ``best'' one by
+Proposition~\ref{prop:biasvar} -- $S^2$ has larger variance than
+$\hat\sigma^2_n$ for normal data, so which one has smaller MSE depends on
+$n$ and on how the two terms in \eqref{eq:biasvar} trade off.
+\end{remark}

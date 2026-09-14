@@ -1,0 +1,108 @@
+\documentclass{Base}
+
+% --- Packages used by the original sample chapter, kept for compatibility ---
+\usepackage{framed}
+\usepackage[outerbars]{changebar}
+
+% --- A few conveniences for note-taking ---
+\usepackage{amssymb}      % extra math symbols (amsmath/amsthm/amsfonts already
+                           % loaded by Base.cls)
+\usepackage{xcolor}        % needed for the blue!60!black mixes below
+\usepackage{hyperref}      % clickable TOC / refs / citations -- convenient
+                            % for on-screen study notes
+
+% === Added by ME [START]=== %
+\usepackage{float}
+\usepackage{graphicx}
+\setcounter{tocdepth}{3} %set content page depth
+\usepackage{bm}
+
+\usepackage{mdframed}
+\usepackage{etoolbox}
+
+\usepackage{mdframed}
+
+% ============================================================
+%  Left-bar highlight for definitions/theorems -- NOT examples.
+% ============================================================
+\mdfdefinestyle{barstyle}{%
+  leftline=true, rightline=false, topline=false, bottomline=false,
+  linewidth=2.5pt,
+  linecolor=black,
+  innertopmargin=2pt, innerbottommargin=2pt,
+  innerleftmargin=10pt, innerrightmargin=0pt,
+  skipabove=8pt, skipbelow=8pt,
+}
+
+\surroundwithmdframed[style=barstyle]{definition}
+\surroundwithmdframed[style=barstyle]{theorem}
+\surroundwithmdframed[style=barstyle]{proposition}
+\surroundwithmdframed[style=barstyle]{lemma}
+% === Added by ME [START]=== %
+
+
+\hypersetup{
+  colorlinks = true,
+  linkcolor  = blue!60!black,
+  citecolor  = blue!60!black,
+  urlcolor   = blue!60!black
+}
+
+% ============================================================
+%  Recap / Recall -- same formatting as Definition / Theorem /
+%  Proposition (bold header, italic body via amsthm's "common"
+%  style, already set up in Base.cls). No extra packages needed.
+% ============================================================
+\newtheorem{recall}{Recall}[chapter]
+
+\title{ST3248 Notes}
+\author{Deuel}
+
+% --- Chapter files ---
+% Each chapter lives in its own file under chapters/, starting with
+% \chapter{...} (no \documentclass or \begin{document} in those files).
+% To speed up compilation while editing a single chapter, uncomment
+% \includeonly below and list just the chapter(s) you're working on --
+% LaTeX will reuse the last compiled output for the rest and still keep
+% cross-references/citations correct.
+% \includeonly{chapters/ch01-introduction}
+
+\begin{document}
+
+\frontmatter
+
+% Base.cls does not define the standard \titlepage environment or
+% \maketitle, so the title page is built by hand here.
+\thispagestyle{plain}
+\begin{center}
+\vspace*{1cm}
+{\LARGE\bfseries ST3248 Notes\par}
+\vspace{0.5cm}
+{\large Deuel\par}
+\vspace{0.5cm}
+{\large \today\par}
+\end{center}
+
+\vspace{1cm}
+\makeatletter
+\begingroup
+  \centering\fontsize{12.5}{14}\selectfont\uppercase{Contents}\par
+\endgroup
+\@starttoc{toc}
+\makeatother
+\clearpage
+
+\mainmatter
+
+% --- Add a new \include line here each time you add a chapter file ---
+\include{chapters/ch01}
+\include{chapters/ch02}
+
+
+% --- Bibliography ---
+% Uses sbc.bst (apalike-style, no comma before year) with refs.bib.
+% Run: pdflatex main && bibtex main && pdflatex main && pdflatex main
+\bibliographystyle{sbc}
+\bibliography{refs}
+
+\end{document}

@@ -1,0 +1,510 @@
+\providecommand{\E}{\operatorname{E}}
+\providecommand{\Var}{\operatorname{Var}}
+\providecommand{\fhat}{\hat{f}}
+\providecommand{\data}{\mathcal{D}}
+\providecommand{\Bias}{\operatorname{Bias}}
+
+
+
+\chapter{Introduction to Statistical Learning}
+\label{ch:topic1}
+
+\section{Foundations of Statistical Learning and Conditional Expectation}
+
+\subsection{Core Concepts}
+Across very different applications, statistical learning asks us to extract structure from data. The presence or absence of a response distinguishes into two settings.
+
+\begin{definition}[Supervised Learning]
+    For each observation, we observe predictors and a response variable.
+    \begin{itemize}
+        \item Regression: response is quantitative (e.g. price, income, temperature)
+        \item Classification: response is categorical (e.g. spam/genuine, healthy/sick)
+    \end{itemize}
+\end{definition}
+
+\begin{definition}[Unsupervised Learning]
+    We observe predictors, but no response variable.
+    \begin{itemize}
+        \item reduce dimension and visualise structure
+        \item discover groups of similar observations
+    \end{itemize}
+\end{definition}
+
+\subsection{The Regression Function}
+
+\begin{definition}[The Regression Function]\leavevmode \\
+The function
+\begin{equation}\label{eq:regfunc}
+    m(x):= \E [Y \mid X = x]
+\end{equation}
+is called the regression function. It describes how the \textbf{expected value of $Y$ changes with $X$}.
+\end{definition}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}l p{3cm} l@{}}
+\toprule
+Object & Type & Interpretation\\
+\midrule
+$\text{E}[Y \mid X = x]$ & number & conditional mean at $x$\\
+$m(\cdot)$ & function & maps $x$ to the conditional mean\\
+$\text{E}[Y\mid X] = m(X)$ & random variable & $m$ evaluated at random $X$\\
+\botrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Conditional Expectation}
+Conditional expectation behaves much like ordinary expectation, but with $X$ treated as fixed/known.
+\begin{itemize}
+    \item \textbf{Linearity: } $\text{E}[aY + bZ \mid X]=a\text{E}[Y \mid X]+b\text{E}[Z \mid X]$
+    \item \textbf{Taking out what is known: } $\text{E}[g(X)Y \mid X] = g(X)\text{E}[Y \mid X]$
+    \item \textbf{Independence:} If $X$ and $Y$ are independent, then $\text{E}[Y \mid X] = \text{E}[Y]$
+    \item \textbf{Tower property:} $\text{E}(\text{E}[Y \mid X])=\text{E}[Y]$ and $\text{E}(\text{E}[Y \mid Z, X] \mid X) =\text{E}(Y \mid X)$
+\end{itemize}
+
+\subsubsection{Conditional Variance}
+The conditional mean
+\begin{equation*}
+    m(X)=\E [Y \mid X]
+\end{equation*}
+describes the part of $Y$ that can be predicted from $X$. \\
+The variation that remains after observing $X$ is measured by
+\begin{equation*}
+    \Var(Y \mid X) = \E \bigl[ \{Y-\E [Y \mid X]\}^2 \mid X\bigr]
+\end{equation*}
+
+\begin{theorem}[Law of Total Variance]
+    \begin{equation}\label{eq:lawtotalvar}
+        \Var(Y) = \E [\Var(Y \mid X)] + \Var(\E[Y \mid X])
+    \end{equation}
+where $\Var(Y)$ is the total variation, $\E [\Var(Y \mid X)]$ is the variation remaining after observing $X$, and $\Var(\E[Y \mid X])$ is the variation explained by $X$.
+\end{theorem}
+
+
+\begin{example}[Toy Example]\leavevmode \\
+Let $X \in \{0,1,2\}$ be the number of exclamation marks in an email, and let
+\begin{equation*}
+Y=\left\{\begin{array}{@{}c@{}c}
+1,&\quad \mbox{spam}\\
+0,&\quad \mbox{genuine}
+\end{array}
+\right.
+\end{equation*}
+Suppose the joint distribution of $(X,Y)$ is
+\begin{table}[h]
+    \centering
+    \begin{tabular}{ccccc}\toprule
+         &$x=0$& $x=1$&$x=2$& $p_Y(y)$\\\midrule
+         $y=0$&   0.4& 0.15&0.05& 0.60\\
+         $y=1$&   0.05& 0.10&0.25& 0.40\\
+         \midrule
+         $p_X(x)$& 0.45& 0.25& 0.30&1\\ 
+         \botrule
+    \end{tabular}
+\end{table}
+
+From the marginals,
+\begin{equation*}
+    \operatorname{E}[X] =0.85, \quad \quad \operatorname{E}[Y]=P(\text{spam)}=0.40 
+\end{equation*}
+
+Without looking at $X$, every email receives the same prediction $P(\text{spam})=0.40$. Hence, does knowing $X$ improve this prediction? If $X$ does not contain information about $Y$, then $X$ and $Y$ are independent and their joint probabilities would factorize. But, for example,
+\begin{equation*}
+    p(0,0)=0.40 \quad \neq \quad p_X(0)p_Y(0)=0.45(0.60)=0.27
+\end{equation*}
+
+Hence, $X$ and $Y$ are dependent, i.e. the distribution of $Y$ changes with $X$. The covariance describes the direction of their linear association:
+\begin{align*}
+\E[XY] = (1)(1)(0.10)+2(1)(0.25)=0.60\\
+\operatorname{Cov}(X,Y) = 0.60-(0.85)(0.40)=0.26>0
+\end{align*}
+
+Since the covariance is positive, $X$ and $Y$ move in the same direction: more exclamation marks are associated with a higher probability of an email being spam.
+
+Since $Y$ is binary, its regression function is the conditional probability of spam:
+\begin{equation*}
+    m(x)=\E[Y \mid X =x] = P(\text{spam} \mid X = x)
+\end{equation*}
+
+Using the joint distribution,
+\begin{equation*}
+    m(0)=\frac{0.05}{0.45}=\frac{1}{9}, \quad m(1)=\frac{0.10}{0.25}=\frac{2}{5}, \quad m(2)=\frac{0.25}{0.30}=\frac{5}{6}
+\end{equation*}
+
+Thus, conditioning on $X$ turns one baseline prediction into predictions tailored to the observed characteristic $X$ of the email. 
+
+Knowing $X$ reduces our uncertainty about $Y$ since without observing $X$, $Y$ is Bernoulli with success probability $0.40$, so 
+\begin{equation*}
+    \Var(Y)=0.40(1-0.40)=0.24
+\end{equation*}
+
+Given $X=x$, $Y$ is Bernoulli with success probability $m(x)$, so
+\begin{equation*}
+    \Var(Y \mid X=x)=m(x)\{1-m(x)\}
+\end{equation*}
+
+Hence, averaging over $X$,
+\begin{equation*}
+    \E[\Var(Y \mid X)] = 0.45 \left( \frac{8}{81} \right) + 0.25 \left( \frac{6}{25} \right) + 0.30 \left( \frac{5}{36} \right) \approx 0.146
+\end{equation*}
+
+By law of total variance (\ref{eq:lawtotalvar}), total variance is $0.24$, variation remaining after observing $X$ is $0.146$, and the variation explained by $X$ is $0.094$. Knowing $X$ reduces the average remaining uncertainty from $0.24$ to $0.146$.
+
+\begin{remark}
+    (1) We learn how $Y$ depends on $X$ and use this relationship to predict new observations. (2) Without $X$, the natural prediction is $\E[Y]$, but after observing $X$, we can use $\E[Y \mid X]$. (3) The regression function captures the predictable variation of $Y$, and informative predictors can improve prediction by explaining more of the variation in $Y$.
+\end{remark}
+\end{example}
+
+\subsubsection{More predictors explains more variation}
+Suppose we have an additional predictor $Z$. Then
+\begin{equation*}
+    \E[\E[Y \mid X,Z] \mid X] = \E[Y \mid X]
+\end{equation*}
+by the tower property.
+
+Apply the law of total variance to
+\begin{equation*}
+    U=\E [Y \mid X,Z]
+\end{equation*}
+
+Then,
+\begin{align*}
+    \Var(\E[Y \mid X,Z]) &= \Var(\E[U \mid X]) + \E[\Var(U \mid X)] \\
+    &= \Var(\E[Y \mid X]) + \E[\Var(\E(Y \mid X,Z) \mid X)]
+\end{align*}
+
+Since $\E[\Var(\E(Y \mid X,Z) \mid X)] \geq 0$, therefore, 
+\begin{equation*}
+    \Var(\E[Y \mid X]) \leq \Var(\E[Y \mid X,Z])
+\end{equation*}
+
+This means at the population level, additional predictors can only increase the variation explained by the regression function. 
+
+So far, the population regression function $m(x)=\E[Y \mid X =x]$ is treated as if it were known. In practice, $m$ is unknown and must be \textbf{estimated from finite data}. Using more predictors and fitting more flexible relationships can make this estimation problem harder.
+\begin{itemize}
+    \item Bias: A model that is too simple may miss important structure
+    \item Variance: A model that is too flexible may change substantially from one sample to another
+\end{itemize}
+
+\section{The Regression Model}
+
+\subsection{Model Definition and Variation}
+Let $Y$ be a quantitative response and $X=(X_1,\dots,X_p)^\top$ a vector of predictors.
+\begin{definition}[Homoscedastic Regression Model]\leavevmode \\
+    We assume
+    \begin{equation}\label{eq:homoregmodel}
+        Y=f(X)+\varepsilon
+    \end{equation}
+    where
+    \begin{equation*}
+        \E[\varepsilon \mid X] = 0, \quad \quad \Var(\varepsilon \mid X) = \sigma^2 < \infty
+    \end{equation*}
+\end{definition}
+
+The conditional mean-zero assumption implies
+\begin{equation*}
+    \E[Y \mid X] = f(X)+\E[\varepsilon \mid X]=f(X)
+\end{equation*}
+
+Hence
+\begin{equation*}
+    f(X)=m(X)=\E[Y \mid X]
+\end{equation*}
+
+Thus under this model, the unknown function $f$ is exactly the regression function (\ref{eq:regfunc}).
+
+\subsubsection{Systematic Variation and Noise}
+The model $Y=f(X)+\varepsilon$ (\ref{eq:homoregmodel}) separates the response into two parts:
+
+\begin{enumerate}
+    \item $f(X)$ is the \textbf{systematic part} of $Y$: the conditional mean of $Y$ given $X$, and hence the part predictable from $X$.
+    \item $\varepsilon = Y-f(X)$ is the \textbf{noise}: the remaining variation around the regression function. Since $\E [\varepsilon \mid X] = 0$, it has no systematic component left once X is known.
+\end{enumerate}
+
+$\sigma^2=\Var(\varepsilon \mid X)$ measures the amount of this remaining variation. Homoscedasticity means that it is the same for every value of X, while heteroscedastic data means $\Var(\varepsilon \mid X)=\sigma^2(X)$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{img/regmodelgraph.JPG}
+\end{figure}
+
+\vspace{-1cm}
+\begin{itemize}
+    \item The black curve is $f(X) = \E [Y \mid X=x]$, the systematic relationship.
+    \item The vertical segments are $\varepsilon_i=y_i-f(x_i)$, the unsystematic noise terms.
+    \item Gien $X=x$, the observations vary around $f(x)$ with mean-zero noise and variance $\sigma^2$.
+    \item \textbf{We never observe $f$ directly but rather the data scattered around it.}
+\end{itemize}
+
+\subsection{Goals of Learning}
+Knowing $f$ is useful for two quite different reasons.
+\begin{definition}[Prediction]\leavevmode \\
+We want to \textit{predict} the response $Y$ from observed predictors $X$. We use
+\begin{equation*}
+    \hat{Y}:=\hat{f}(X)
+\end{equation*}
+where what matters is how accurately $\hat{f}(X)$ predicts $Y$; the form of $\hat{f}$ itself may be unimportant.
+\end{definition}
+
+\begin{definition}[Inference]\leavevmode \\
+We want to \textit{understand} how the response $Y$ depends on the predictors $X$. We use
+\begin{equation*}
+    \hat{f}
+\end{equation*}
+to learn which predictors matter, in which direction, and how strongly. What matters is what $\hat{f}$ tells us about the relationship between $X$ and $Y$.
+\end{definition}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}l p{3.5cm} l@{}}
+\toprule
+ & Prediction & Inference\\
+\midrule
+main goal: & predict $Y$ accurately & understand how $Y$ depends on $X$\\
+what matters: & $\hat{f}(x)$ is accurate & the structure of $\hat{f}$ is interpretable\\
+complexity: & can be useful & can make interpretation harder\\
+\botrule
+\end{tabular}
+\end{table}
+
+\section{Evaluating Model Performance}
+We observe a training set $\mathcal{D}=\{(x_1,y_1),\dots,(x_n,y_n)\}$ where $y_i=f(x_i)+\varepsilon_i$. A \textbf{statistical learning method} uses these data to construct an estimate of $f$: $\mathcal{D}\longmapsto \hat{f}_{\mathcal{D}}$. Because $\hat{f}$ is constructed from the data, different training samples will generally produce different fitted functions:$\mathcal{D}_1\longmapsto \hat{f}_{\mathcal{D}_1}$, $\mathcal{D}_2\longmapsto \hat{f}_{\mathcal{D}_2}$, $\dots$.
+
+\subsection{Measuring Accuracy}
+
+
+Suppose $\fhat$ has been fitted using the training data $\mathcal{D}$. Consider a new observation $(X_0,Y_0)$, drawn from the same population but not used to fit $\fhat$.
+
+\begin{definition}[Mean Squared Prediction Error]\leavevmode \\
+The mean squared prediction error (MSPE) of the fitted function $\fhat$ is
+\begin{equation*}
+    \E\big[\{Y_0-\fhat(X_0)^2\} \mid \mathcal{D} \big]
+\end{equation*}
+\end{definition}
+
+The expectation averages over new observations $(X_0,Y_0)$, while the fitted function $\fhat$ is held fixed (by conditioning on the data $\data$). A good fitted model predicts new observations accurately, i.e. has small MSPE.
+
+The MSPE is a population quantity and is generally unknown. Two sample quantities are useful: training MSE to measure fit and test MSE to measure prediction.
+\begin{definition}[Training MSE] \leavevmode \\
+Measures the fit to the \textbf{training data}, using the observations that were used to fit $\fhat$,
+\begin{equation*}
+     \text{MSE}_\text{train}=\frac{1}{n}\sum_{i=1}^{n}\{y_i-\fhat(x_i)\}^2
+\end{equation*}
+\end{definition}
+
+\begin{definition}[Test MSE] \leavevmode \\
+Estimates prediction error on \textbf{new data}, using new observations $(x_1^0,y_1^0),\dots,(x_m^0,y_m^0)$ not used to fit $\fhat$,
+\begin{equation*}
+     \text{MSE}_\text{test}=\frac{1}{m}\sum_{j=1}^{m}\{y_j^0-\fhat(x_j^0)\}^2
+\end{equation*}
+\end{definition}
+
+\subsection{Model Complexity and Overfitting}
+Different learning methods allow fitted functions of different complexity. For example, consider polynomials of increasing degree:
+\begin{equation*}
+    \mathcal{F}_1\subset \mathcal{F}_2\subset \mathcal{F}_3\subset\dots, \quad \mathcal{F}_d=\{\beta_0+\beta_1x+\dots+\beta_dx^d\}
+\end{equation*}
+
+A larger class is \textbf{more flexible}: it allows $\fhat$ to take a wider variety of shapes. \textit{Lower} flexibility would imply straighter lines while \textit{higher} flexibility increases the complexity of the curves. 
+
+Greater flexibility makes it easier to fit the training data closely since as flexibility increases, we expect the fitted function to follow the training observations more closely. Hence, the training MSE should decrease. But the quantity we care about is the prediction error on new observations: \textbf{Does a smaller training MSE imply a smaller test MSE?}
+
+\subsubsection{Training Error versus Test Error}
+To find out, we simulate data from a known regression function $f$. The left panel shows one training sample and three polynomial fits, where increasing flexibility lets the fitted curve follow the training data more closely. The right panel shows the training and test MSE as the flexibility increases. The horizontal dashed line is $\Var(\varepsilon)=\sigma^2$, the irreducible error.
+
+\begin{enumerate}
+    \item \textbf{$f$ is Non-Linear} \newline
+    \begin{figure}[H]\vspace{-0.75cm}
+        \centering
+        \includegraphics[width=0.75\linewidth]{img/s1nonlinear.png}
+    \end{figure}\vspace{-0.5cm}
+    \item \textbf{$f$ is Nearly Linear} \newline
+    \begin{figure}[H]\vspace{-0.75cm}
+        \centering
+        \includegraphics[width=0.75\linewidth]{img/s2nearlylinear.png}
+    \end{figure}\vspace{-0.5cm}
+    \item \textbf{$f$ is Highly Non-Linear} \newline
+    \begin{figure}[H]\vspace{-0.75cm}
+        \centering
+        \includegraphics[width=0.75\linewidth]{img/s3highlynonlinear.png}
+    \end{figure}\vspace{-0.5cm}
+\end{enumerate}
+
+The details differ across the three scenarious, but the qualitative message is stable:
+\begin{itemize}
+    \item Training MSE decreases as flexibility increases.
+    \item Test MSE is typically U-shaped.
+    \item The optimal flexibility depends on the unknown true function $f$.
+    \item Training MSE therefore cannot be trusted to choose flexibility: it tends to prefer models that are too flexible.
+\end{itemize}
+
+\subsubsection{Overfitting}
+
+\begin{definition}[Overfitting]
+    Overfitting occurs when increasing flexibility improves fit to the training data but worsens prediction on new data.
+\end{definition}
+Overfitting is seen on the right-hand side of the U-shaped test-error curve. The mechanism is already visible in the regression model:
+
+\begin{equation*}
+    y_i=f(x_i)+\varepsilon_i
+\end{equation*}
+where $f(x_i)$ is the signal and $\varepsilon_i$ is the noise. A very flexible method adapts to both the signal and the sample-specific noise which does not repeat in a new sample. Overfitting means fitting features of the training data that do not generalise.
+
+\subsection{Optimal Predictors and Bias-Variance Trade-off}
+Suppose we could choose \textit{any} function $g$ to predict $Y$ from $X$. Under squared-error loss, its mean squared prediction error is
+\begin{equation*}
+    \E \big[\{Y-g(X)\}^2\big]
+\end{equation*}
+
+\begin{theorem}[Error Decomposition]\label{thm:errordecomp} \leavevmode \\
+    Suppose
+    \begin{equation*}
+        Y=f(X)+\varepsilon, \quad \E[\varepsilon \mid X]=0, \quad \Var(\varepsilon \mid X)=\sigma^2
+    \end{equation*}
+    Then, for any predictor $g(X)$,
+    \begin{equation*}
+        \E \big[\{Y-g(X)\}^2\big] = \E \big[\{f(X)-g(X)\}^2\big] + \sigma^2
+    \end{equation*}
+\end{theorem}
+
+Since $\E \big[\{f(X)-g(X)\}^2\big] \geq 0$, the mean squared predictor error is minimise by setting $g(X)$ equal to
+\begin{equation*}
+    f(X)=\E[Y \mid X]
+\end{equation*}
+Therefore, the regression function is the best possible predictor of $Y$ under squared error.
+
+\subsubsection{Reducible and Irreducible Error}
+Hold the fitted function $\fhat$ fixed and consider prediction on a new observation. By theorem (\ref{thm:sqerror}),
+\begin{equation*}
+    \E \Big[\{Y_0-\fhat(X_0)\}^2 \Big| \data\Big]
+    =
+    \E \Big[\{f(X_0)-\fhat(X_0)\}^2 \Big| \data\Big] + \sigma^2
+\end{equation*}
+
+\begin{definition}[Reducible Error]\leavevmode\\
+    Our fitted function $\fhat$ differs from the true regression function $f$. Better estimation of $f$ can reduce this part.
+\end{definition}
+
+\begin{definition}[Irreducible Error]\leavevmode\\
+    Even if $\fhat = f$, the response still varies around $f(X)$ because of the noise $\varepsilon$. No prediction method can remove this part.
+\end{definition}
+
+With the learning method fixed, $\fhat(x_0)$ is random because the training data are random. 
+\begin{equation*}
+    \data \longmapsto \fhat_\data \longmapsto \fhat_\data(x_0)
+\end{equation*}
+
+If we repeatedly collect new training sampples and refit the model, we obtain different predictions at the same point $x_0$:
+\begin{equation*}
+    \fhat_{\data_{1}}(x_0), \quad \fhat_{\data_{2}}(x_0), \quad \fhat_{\data_{3}}(x_0), \quad \dots
+\end{equation*}
+
+Thus, $\E[\fhat(x_0)$ and $\Var(\fhat(x_0)$ refer to repeated training samples. Estimation introduces a second source of randomness: the training sample itself.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/flexibilityaveragefit.png}
+\end{figure}\vspace{-0.5cm}
+Each thin curve is fitted from different training sets generated from the same population. The dashed curve is the average fit $\E[\fhat]$; the black curve is the truth $f$. We see two entirely different things can go wrong at fixed point $x_0$.
+
+\begin{definition}[Bias]\leavevmode\\
+Measures systematic error
+    \begin{equation*}
+        \Bias (\fhat(x_0)) := \E[\fhat(x_0)]-f(x_0)
+    \end{equation*}
+\end{definition}
+
+\textbf{Systematically wrong:} The method aims at the wrong place where $\E[\fhat(x_0)] \neq f(x_0)$. The fitted curves agree with one another but systematically miss $f$.
+
+\begin{definition}[Variance]\leavevmode\\
+Measures sample-to-sample instability
+    \begin{equation*}
+        \Var(\fhat(x_0)):= \E \Big[\big\{\fhat(x_0)-\E[\fhat(x_0)]\big\}^2\Big]
+    \end{equation*}
+\end{definition}
+
+\textbf{Unstable:} The method changes substantially from one training sample to another. The fits are close to $f$ on average but individual fits vary widely.
+
+Low flexibility tends to produce more bias and less variance while high flexibility tends to produce less bias and more variance.
+
+\subsubsection{Mean Squared Error Decomposition}
+Fix a test point $x_0$ and consider a new response
+\begin{equation*}
+    Y_0=f(x_0)+\varepsilon_0, \quad \E[\varepsilon_0]=0, \quad \Var(\varepsilon_0)=\sigma^2
+\end{equation*}
+The training data used to construct $\fhat$ are independent of the new noise $\varepsilon_0$. We study the \textbf{expected test error} at $x_0$,
+\begin{equation*}
+    \E \big[(Y_0-\fhat(x_0))^2\big]
+\end{equation*}
+where the expectation averages over both (1) the random training data that determine $\fhat$, and (2) the new response $Y_0$.
+
+\begin{theorem}[Mean Squared Error Decomposition]\leavevmode\\
+    For a fixed test point $x_0$,
+    \begin{equation*}
+        \E\big[(Y_0-\fhat(x_0))^2\big]=\sigma^2+\Bias(\fhat(x_0))^2 + \Var(\fhat(x_0))
+    \end{equation*}
+\end{theorem}
+
+\begin{itemize}
+    \item \textbf{Irreducible noise} ($\sigma^2$): randomness in $Y_0$ that no method can predict
+    \item \textbf{Squared Bias} ($\Bias(\fhat(x_0))^2$): systematic error of the learning model
+    \item \textbf{Variance} ($\Var(\fhat(x_0))$): instability cause by estimating $f$ from a random finite sample
+\end{itemize}
+
+\begin{table}[H]\vspace{-0.5cm}
+\centering
+\begin{tabular}{@{}l p{5cm} l@{}}
+\toprule
+Term & What it measures & How can it change?\\
+\midrule
+$\sigma^2$ & noise in $Y$ given $X$ & cannot be reduced\\
+$\Bias(\fhat(x_0))^2$ & systematic error & typically falls with flexibility\\
+$\Var(\fhat(x_0))$ & sample-to-sample instability & typically rises with flexibility\\
+\botrule
+\end{tabular}
+\end{table}
+
+Thus, increasing flexibility typically has opposite effects:
+\begin{equation*}
+    \text{more flexibility} \Longrightarrow 
+    \begin{cases} 
+    \text{lower bias,} \\ 
+    \text{higher variance}
+    \end{cases}
+\end{equation*}
+
+\begin{figure}[H]\vspace{-0.75pt}
+    \centering
+    \includegraphics[width=0.75\linewidth]{img/flexibility3.png}
+\end{figure}\vspace{-0.7pt}
+We see that in every panel, squared bias (blue) decreases and variance (yellow) increases with flexibility. Their sum, plus the constant $\sigma^2$, produces the test MSE (red) curve.
+
+\begin{figure}[H]\vspace{-0.75pt}
+    \centering
+    \includegraphics[width=0.6\linewidth]{img/flexibilitystacked.png}
+\end{figure}\vspace{-0.75pt}
+Stacking the lines, we see that:
+\begin{itemize}
+    \item The grey floor $\sigma^2$ is there whatever we do
+    \item Squared bias (blue) shrinks as we move right; variance (yellow) grows
+    \item The optimum is where their total is the smallest (red)
+\end{itemize}
+
+The opposite dependence of bias and variance on flexibility is the \textbf{bias-variance trade-off}. At first, increasing flexibility may reduce squared bias by more than it increases variance. Eventually, the increase in variance dominates.
+
+\begin{table}[H]\vspace{-0.5cm}
+\centering
+\begin{tabular}{ccc}
+\toprule
+Low flexibility & Moderate flexibility & High flexibility\\
+\midrule
+high bias & lower bias & low bias\\
+low variance & moderate variance & high variance\\
+underfitting & good prediction & overfitting\\
+\botrule
+\end{tabular}
+\end{table}\vspace{-0.5cm}
+
+The optimal flexibility depends on the unknown $f$, the noise level, and the amount of data available.
+
+

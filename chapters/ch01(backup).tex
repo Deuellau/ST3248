@@ -1,0 +1,83 @@
+\chapter{Introduction to Statistical Learning}
+\label{ch:topic1}
+
+\section{Regression Function}
+The function
+\[
+m(x):= \text{E}[Y \mid X = x]
+\]
+is called the \textit{regression function}. It describes how the \textbf{expected value of Y changes with X}.
+
+\begin{table}[h]
+\begin{tabular}{@{}l p{3cm} l@{}}
+\toprule
+Possible cuts & Type & Interpretation\\
+\midrule
+$\text{E}[Y \mid X = x]$ & number & conditional mean at $x$\\
+$m(\cdot)$ & function & maps $x$ to the conditional mean\\
+$\text{E}[Y\mid X] = m(X)$ & random variable & $m$ evaluated at random $X$\\
+\botrule
+\end{tabular}
+\end{table}
+
+\section{Key Properties}
+\subsection{Conditional Expectation}
+Conditional expectation behaves much like ordinary expectation, but with $X$ treated as fixed/unknown.
+
+\begin{itemize}
+    \item \textbf{Linearity: } $\text{E}[aY + bZ \mid X]=a\text{E}[Y \mid X]+b\text{E}[Z \mid X]$
+    \item \textbf{Taking out what is known: } $\text{E}[g(X)Y \mid X] = g(X)\text{E}[Y \mid X]$
+    \item \textbf{Independence:} If $X$ and $Y$ are independent, then $\text{E}[Y \mid X] = \text{E}[Y]$
+    \item \textbf{Tower property:} $\text{E}(\text{E}[Y \mid X])=\text{E}[Y]$ and $\text{E}(\text{E}[Y \mid Z, X] \mid X) =\text{E}(Y \mid X)$
+\end{itemize}
+
+\subsection{Conditional Variance}
+The conditional mean
+\[
+m(X)=\text{E}[Y \mid X]
+\]
+describes the part of $Y$ that can be predicted from $X$.
+The variation that remains after observing $X$ is measured by
+\[
+\operatorname{Var}(X \mid Y)=\text{E}[\{{Y-\text{E}[Y \mid X]\}^2 \mid X}]
+\]
+
+\begin{definition}[Law of Total Variance]
+\begin{equation}
+\operatorname{Var}(Y)=\operatorname{E}[\operatorname{Var}(Y \mid X)] + \operatorname{Var}(\operatorname{E}[Y \mid X])
+\end{equation}
+\end{definition}
+where $\operatorname{Var}(Y)$ is the total variation, $\operatorname{E}[\operatorname{Var}(Y \mid X)]$ is the variation remaining after observing $X$, and $\operatorname{Var}(\operatorname{E}[Y \mid X])$ is the variation explained by $X$.
+
+\begin{example}[Toy Example]
+Let $X \in \{0,1,2\}$ be the number of exclamation marks in an email, and let
+\begin{equation*}
+Y=\left\{\begin{array}{@{}c@{}c}
+1,&\quad \mbox{spam}\\
+0,&\quad \mbox{genuine}
+\end{array}
+\right.
+\end{equation*}
+Suppose the joint distribution of $(X,Y)$ is
+\begin{table}[h]
+    \centering
+    \begin{tabular}{ccccc}\toprule
+         &$x=0$& $x=1$&$x=2$& $p_Y(y)$\\\midrule
+         $y=0$&   0.4& 0.15&0.05& 0.60\\
+         $y=1$&   0.05& 0.10&0.25& 0.40\\
+ $p_X(x)$& 0.45& 0.25& 0.30&1\\ \bottomrule 
+    \end{tabular}
+    \label{tab:placeholder}
+\end{table}
+
+From the marginals,
+\begin{equation}
+    \operatorname{E}[X] =0.85, \quad \operatorname{E}[Y]=P(\text{spam)}=0.40 
+\end{equation}
+\end{example}
+
+
+
+
+
+    

@@ -1,0 +1,64 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+Start writing your notes here. This chapter is a placeholder that
+demonstrates the environments provided by the class, so you can see how
+they render before replacing the content with your own.
+
+\section{Definitions and Results}
+
+The class (via \texttt{amsthm}) gives you numbered environments for the
+usual building blocks of a maths course:
+
+\begin{definition}
+\label{def:example}
+A \textbf{definition} environment looks like this. Numbers follow the
+chapter, e.g. Definition~\ref{def:example}.
+\end{definition}
+
+\begin{proposition}
+\label{prop:example}
+A \textbf{proposition} environment looks like this.
+\end{proposition}
+
+\begin{proof}
+And here is how a proof looks, using \texttt{amsthm}'s \texttt{proof}
+environment (inherited via \texttt{amsthm}, which \texttt{Base.cls}
+loads).
+\end{proof}
+
+\begin{theorem}
+\label{thm:example}
+A \textbf{theorem} environment.
+\end{theorem}
+
+\begin{lemma}
+\label{lem:example}
+A \textbf{lemma} environment.
+\end{lemma}
+
+\begin{corollary}
+\label{cor:example}
+A \textbf{corollary} environment, sharing the same counter as theorems.
+\end{corollary}
+
+\begin{example}
+\label{ex:example}
+An \textbf{example} environment, useful for worked problems.
+\end{example}
+
+\begin{remark}
+A \textbf{remark} environment (numbered per section instead of per
+chapter).
+\end{remark}
+
+\section{Citing Sources}
+
+You can cite references from \texttt{refs.bib}, e.g.\ \cite{knuth1986texbook}.
+
+% Note: the Exercises environment below inserts its own numbered
+% "Exercises" \section heading automatically -- don't add one by hand.
+\begin{Exercises}
+\item This is the first exercise in the chapter.
+\item \Hint This is a hint for the second exercise.
+\end{Exercises}

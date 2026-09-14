@@ -1,0 +1,890 @@
+\providecommand{\E}{\operatorname{E}}
+\providecommand{\Var}{\operatorname{Var}}
+\providecommand{\fhat}{\hat{f}}
+\providecommand{\data}{\mathcal{D}}
+\providecommand{\Bias}{\operatorname{Bias}}
+\providecommand{\Cov}{\operatorname{Cov}}
+\providecommand{\thetahat}{\hat\theta}
+\providecommand{\betahat}{\hat{\bm\beta}}
+
+
+\chapter{Linear Regression and Extensions}
+\label{ch:topic2}
+
+\section{Formulation and Estimation of Linear Least Squares}
+
+\subsection{The Population Problem and Empirical Risk Minimization}
+
+\subsubsection{The Population Problem}
+Let
+\begin{equation*}
+    X=(X_1,\dots,X_d)^\top, \quad \widetilde{X}=(1,X^\top)^\top \in \mathbb{R}^p, \quad p=d+1
+\end{equation*}
+
+and suppose
+\begin{equation*}
+    \E[Y^2] < \infty, \quad \E[\lVert X \rVert_2^2]<\infty
+\end{equation*}
+
+We restrict attention to linear predictors
+\begin{equation*}
+    g_\beta=\widetilde{X}^\top\bm\beta, \quad \bm{\beta}=(\beta_0,\beta_1,\dots,\beta_d)^\top \in \mathbb{R}^p
+\end{equation*}
+
+and measure their prediction error by
+\begin{equation*}
+    L(\bm\beta):=\E \Big[\{Y-\widetilde{X}^\top\bm\beta\}^2\Big]
+\end{equation*}
+
+\begin{definition}[Best Linear Predictor] \leavevmode \\
+    The best linear predictor is
+    \begin{equation*}
+        g^*(X)=\widetilde{X}^\top\bm\beta^*, \quad \bm\beta^*\in \arg \min_{\bm\beta\in\mathbb{R}^p}L(\bm\beta)
+    \end{equation*}
+\end{definition}
+
+\subsubsection{Optimal Conditions}
+Recall the loss function:
+\begin{equation*}
+    L(\bm\beta) = \E \Big[\{Y-\widetilde{X}^\top\bm\beta\}^2\Big]
+\end{equation*}
+
+\textbf{First-order condition:} Taking the gradient with respect to $\bm\beta$ gives:
+\begin{equation*}
+    \nabla L(\bm\beta) = -2\E \Big[\widetilde{X}\{Y-\widetilde{X}^\top\bm\beta\}\Big]
+\end{equation*} 
+
+Hence, setting the gradient to zero at the optimal weights $\bm\beta^*$, we have:
+\begin{equation*}
+    \E \Big[\widetilde{X}\{Y-\widetilde{X}^\top\bm\beta^*\}\Big] = 0
+\end{equation*}
+
+\textbf{Second-order condition:} The Hessian matrix is:
+\begin{equation*}
+    \nabla^2 L(\bm\beta) = 2\E \big[\widetilde{X}\widetilde{X}^\top\big]
+\end{equation*}
+
+and, for every vector $a \in \mathbb{R}^p$:
+\begin{equation*}
+    a^\top \nabla^2 L(\bm\beta) a = 2\E \big[(a^\top \widetilde{X})^2\big] \geq 0
+\end{equation*}
+
+Thus, $L$ is convex. Hence, every solution $\bm\beta^*$ is a global minimizer.
+
+\subsection*{Solving the First-Order Conditions \& The Solution}
+
+We begin by splitting the optimal weights vector into the intercept $\beta_0^*$ and the slope coefficients $\bm\beta_{-0}^* \in \mathbb{R}^d$:
+\begin{equation*}
+    \bm\beta^* = (\beta_0^*, \bm\beta_{-0}^{*\top})^\top
+\end{equation*}
+
+Expanding the first-order condition from the previous step yields two separate equations:
+\begin{align*}
+    \E[Y - \beta_0^* - \bm\beta_{-0}^{*\top}X] &= 0 \\
+    \E[X\{Y - \beta_0^* - \bm\beta_{-0}^{*\top}X\}] &= 0
+\end{align*}
+
+The first equation allows us to easily isolate the intercept:
+\begin{equation*}
+    \beta_0^* = \E[Y] - \bm\beta_{-0}^{*\top}\E[X]
+\end{equation*}
+
+We then substitute this intercept back into the second equation:
+\begin{equation*}
+    0 = \E\big[X\{Y - \E[Y]\}\big] - \E\big[X(X - \E[X])^\top\big]\bm\beta_{-0}^*
+\end{equation*}
+
+Notice that the two expectations in this equation are exactly the population covariance quantities. Because $\E[Y - \E[Y]] = 0$ and $\E[X - \E[X]] = 0$, we can rewrite them as:
+\begin{align*}
+    \E\big[X\{Y - \E[Y]\}\big] &= \E\big[(X - \E[X])\{Y - \E[Y]\}\big] = \Cov(X,Y) \\
+    \E\big[X(X - \E[X])^\top\big] &= \E\big[(X - \E[X])(X - \E[X])^\top\big] = \Cov(X)
+\end{align*}
+
+Define $\Sigma_{XX} := \Cov(X)$ and $\Sigma_{XY} := \Cov(X,Y)$. The slope coefficients must therefore satisfy:
+\begin{equation*}
+    \Sigma_{XX}\bm\beta_{-0}^* = \Sigma_{XY}
+\end{equation*}
+
+Thus, if the covariance matrix $\Sigma_{XX}$ is invertible, we arrive at the final unique solution for the best linear predictor:
+\begin{equation*}
+    \bm\beta_{-0}^* = \Sigma_{XX}^{-1}\Sigma_{XY}, \quad \beta_0^* = \E[Y] - \bm\beta_{-0}^{*\top}\E[X]
+\end{equation*}
+
+\subsubsection{First-Order Conditions}
+Define the population residual
+\begin{equation*}
+    \varepsilon^*:=Y-g^*(X)
+\end{equation*}
+
+The first-order conditions become
+\begin{align*}
+    \E[\varepsilon^*] &= 0, \\
+    \E[X_j\varepsilon^*] &=0, \quad j=1,\dots,d.
+\end{align*}
+
+Therefore,
+\begin{align*}
+    \Cov(X_j,\varepsilon^*) &= \E[X_j\varepsilon^*]-\E[X_j]E[\varepsilon^*] \\
+    &= 0, \quad j=1,\dots,d.
+\end{align*}
+
+The residual from the best linear predictor is \textbf{uncorrelated} with every predictor.
+
+\subsubsection{Non-linear Regression Function}
+Under the regression model,
+\begin{equation*}
+    f(X)=\E[Y \mid X]
+\end{equation*}
+
+is the best predictor among all functions of $X$, whereas
+\begin{equation*}
+    g^*(X)=\beta_0^*+{\bm\beta^{\bm*}}^{\top}X
+\end{equation*}
+
+is the best predictor among linear functions. If $f$ is not linear, these generally differ $g^*(X) \neq f(X)$. From Theorem \ref{thm:errordecomp}, the approximation error $\E \big[\{f(X)-g^*(X)\}^2\big]$ is 0 when $f(X)=g^*(X)$ almost surely. Restricting the model class to linear functions can create approximation error.
+
+\subsubsection{From the Population to the Sample}
+\begin{theorem}[Weak Law of Large Numbers]\leavevmode\\
+    If $W_1,\dots,W_n$ are i.i.d. with
+    \begin{equation*}
+        \E[W_i]=\mu, \quad \Var(W_i)<\infty,
+    \end{equation*}
+    then, for every $\epsilon > 0$,
+    \begin{equation*}
+        \mathbb{P}\bigg(\bigg|\frac{1}{n}\sum_{i=1}^{n}W_i-\mu\bigg|>\epsilon\bigg)\longrightarrow 0.
+    \end{equation*}
+\end{theorem}
+
+In order words, as the sample size grows, the sample average converges to the population average. For example,
+\begin{equation*}
+    \frac{1}{n}\sum_{i=1}^{n}x_iy_i\approx\E[XY], \quad
+    \frac{1}{n}\sum_{i=1}^{n}x_ix_i^\top\approx\E[XX^\top]
+\end{equation*}
+
+If the population distribution were known, we would minimise
+\begin{equation*}
+    L(\beta_0,\bm\beta)=\E\Big[\{Y-\beta_0-\bm\beta^\top X\}^2\Big]
+\end{equation*}
+
+But with i.i.d. observations $(x_i,y_i)_{i=1}^{n}$, replace the population average by its sample analogue:
+\begin{equation*}
+    L_n(\beta_0,\bm\beta)=\frac{1}{n}\sum_{i=1}^{n}\{y_i-\beta_0-\bm\beta^\top x_i\}^2
+\end{equation*}
+
+Then solve the sample (a.k.a. empirical) optimisation problem: \textbf{empirical risk minimisation}
+\begin{equation*}
+    (\widehat{\beta}_0,\widehat{\bm\beta})\in\arg \min_{\beta_0,\bm\beta}L_n(\beta_0,\bm\beta)
+\end{equation*}
+
+\subsubsection{Solving the Sample Problem: One Predictor}
+
+For a single predictor ($d=1$), the empirical loss function is:
+\begin{equation*}
+    L_n(\beta_0, \beta_1) = \frac{1}{n}\sum_{i=1}^n (y_i - \beta_0 - \beta_1 x_i)^2
+\end{equation*}
+
+\textbf{First-order condition:}
+Setting the partial derivatives to zero:
+\begin{align*}
+    \frac{\partial L_n}{\partial \beta_0} &= -\frac{2}{n}\sum_{i=1}^n (y_i - \beta_0 - \beta_1 x_i) = 0 \\
+    \frac{\partial L_n}{\partial \beta_1} &= -\frac{2}{n}\sum_{i=1}^n x_i(y_i - \beta_0 - \beta_1 x_i) = 0
+\end{align*}
+
+Thus, any minimizer $(\hat{\beta}_0, \hat{\beta}_1)$ must satisfy:
+\begin{align*}
+    \sum_{i=1}^n (y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i) &= 0 \\
+    \sum_{i=1}^n x_i(y_i - \hat{\beta}_0 - \hat{\beta}_1 x_i) &= 0
+\end{align*}
+
+\textbf{Second-order condition:} The Hessian matrix is:
+\begin{equation*}
+    \nabla^2 L_n(\beta_0, \beta_1) = \frac{2}{n}
+    \begin{pmatrix}
+        n & \sum_{i=1}^n x_i \\
+        \sum_{i=1}^n x_i & \sum_{i=1}^n x_i^2
+    \end{pmatrix}
+\end{equation*}
+
+For any vector $(a, b) \in \mathbb{R}^2$:
+\begin{equation*}
+    (a, b) \nabla^2 L_n(\beta_0, \beta_1) 
+    \begin{pmatrix} 
+        a \\ 
+        b 
+    \end{pmatrix} 
+    = \frac{2}{n}\sum_{i=1}^n (a + b x_i)^2 \geq 0
+\end{equation*}
+
+Hence, $L_n$ is convex, and $(\hat{\beta}_0, \hat{\beta}_1)$ is a global minimizer.
+
+\textbf{Solving the equations:} The first normal equation gives:
+\begin{equation*}
+    \hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}, \quad \text{where } \bar{x} = \frac{1}{n}\sum_{i=1}^n x_i, \quad \bar{y} = \frac{1}{n}\sum_{i=1}^n y_i
+\end{equation*}
+
+Substituting this into the second equation:
+\begin{equation*}
+    \hat{\beta}_1 = \frac{\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})}{\sum_{i=1}^n (x_i - \bar{x})^2}
+\end{equation*}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/residuals.png}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Left:} the least squares line minimised the total squared length of the grey segments/
+    \item \textbf{Right:} the residuals $e_i=y_i-\hat{y}_i$ against the fitted values $\hat{y}_i$. By construction, they average to zero and are orthogonal to the fitted values: $\sum_{i=1}^ne_i=0 \Rightarrow \bar{e}=0$
+\end{itemize}
+
+\subsection{Matrix Foundations and Least Squares Solution}
+
+\subsubsection{Matrix Toolbox}
+Let $\bm{u}, \bm{v} \in \mathbb{R}^n$.
+
+\begin{definition}[Inner Product]\leavevmode\\
+    The \textbf{Euclidean inner product} of $\bm{u}$ and $\bm{v}$ is
+    \begin{equation*}
+        \langle\bm{u},\bm{v}\rangle:=\bm{u}^\top \bm{v} = \sum_{i=1}^{n}u_i v_i
+    \end{equation*}
+\end{definition}
+
+\begin{definition}[Euclidean Norm]\leavevmode\\
+    The \textbf{Euclidean norm} of $\bm{v}$ is
+    \begin{equation*}
+        \lVert \bm{v} \rVert_2:= \sqrt{\bm{v}^\top\bm{v}} = \Bigg( \sum_{i=1}^{n}{v_i^2}\Bigg)^{1/2}
+    \end{equation*}
+
+    Hence,
+    \begin{equation*}
+        \lVert \bm{v} \rVert_2^2 = \bm{v}^\top \bm{v}
+    \end{equation*}
+
+    (The Euclidean norm measures the length of a vector.)
+\end{definition}
+
+\noindent
+Let $\bm{A} \in \mathbb{R}^{n \times p}$, with columns $\bm{a}_1,\dots,\bm{a}_p \in \mathbb{R}^n$.
+
+\begin{definition}[Column Space and Rank] \leavevmode\\
+    The \textbf{column space} and \textbf{rank} of $\bm{A}$ are
+    \begin{equation*}
+        \operatorname{col}(\bm{A}) = \operatorname{span}\{\bm{a}_1,\dots,\bm{a}_p\}, \quad
+        \operatorname{rank}(\bm{A})=\operatorname{dim}\{\operatorname{col}(\bm{A})\}.
+    \end{equation*}
+
+    Thus, $\operatorname{rank}(\bm{A}) = p$ exactly when the columns of $\bm{A}$ are linearly independent.
+\end{definition}
+
+\begin{definition}[Orthogonality]
+    Two vectors are \textbf{orthogonal} if
+    \begin{equation*}
+        \bm{u}\perp \bm{v} \quad 
+        \Longleftrightarrow \quad
+        \bm{u}^{\top}\bm{v}=0
+    \end{equation*}
+
+    Moreover,
+    \begin{equation*}
+        \bm{v} \perp \operatorname{col}(\bm{A}) \quad
+        \Longleftrightarrow \quad
+        \bm{A}^\top\bm{v}=0 \quad
+        \Longleftrightarrow \quad
+        \bm{a}_j^\top \bm{v} = 0, \quad j=1,\dots,p.
+    \end{equation*}
+\end{definition}
+
+\noindent
+Let $\bm{A} \in \mathbb{R}^{p \times p}$ be symmetric.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Property} & \textbf{Notation} & \textbf{Definition} \\
+\midrule
+positive definite & $\bm{A} \succ  0$ & $\bm{v}^\top \bm{A}\bm{v} > 0$ for all $\bm{v} \neq \bm{0}$ \\
+positive semidefinite & $\bm{A} \succeq 0$ & $\bm{v}^\top \bm{A}\bm{v} \geq 0$ for all $\bm{v}$ \\
+negative definite & $\bm{A} \prec 0$ & $\bm{v}^\top \bm{A}\bm{v} < 0$ for all $\bm{v} \neq \bm{0}$ \\
+negative semidefinite & $\bm{A} \preceq 0$ & $\bm{v}^\top \bm{A}\bm{v} \leq 0$ for all $\bm{v}$ \\
+indefinite & & $\bm{v}^\top \bm{A}\bm{v}$ takes both signs\\
+\botrule
+\end{tabular}
+\end{table}
+
+For every $\bm{X} \in \mathbb{R}^{n \times p}$,
+\begin{equation*}
+    \bm{v}^\top \bm{X}^\top \bm{X}\bm{v} = (\bm{X}\bm{v})^\top (\bm{X}\bm{v}) = \lVert \bm{X}\bm{v} \rVert_2^2 \geq 0
+\end{equation*}
+
+so
+\begin{equation*}
+    \bm{X}^\top \bm{X} \succeq 0.
+\end{equation*}
+
+Moreover,
+\begin{equation*}
+    \bm{X}^\top \bm{X} \succ 0 \quad \Longleftrightarrow \quad \operatorname{rank}(\bm{X}) = p \quad \Longleftrightarrow \quad \bm{X}^\top \bm{X} \text{ is invertible.}
+\end{equation*}
+
+\begin{definition}[Trace]\leavevmode\\
+    Let $\bm{A}, \bm{B} \in \mathbb{R}^{p \times p}$. The \textbf{trace} of $\bm{A}$ is the sum of its diagonal entries:
+    \begin{equation*}
+        \operatorname{tr}(\bm{A}) := \sum_{j=1}^p A_{jj}.
+    \end{equation*}
+    The trace is linear: $\operatorname{tr}(a\bm{A} + b\bm{B}) = a \operatorname{tr}(\bm{A}) + b \operatorname{tr}(\bm{B})$ for all $a, b \in \mathbb{R}$.
+\end{definition}
+
+\begin{theorem}[Cyclicity of the Trace]\leavevmode\\
+    Let $\bm{A} \in \mathbb{R}^{p \times q}$, $\bm{B} \in \mathbb{R}^{q \times r}$, $\bm{C} \in \mathbb{R}^{r \times p}$. Then,
+    \begin{equation*}
+        \operatorname{tr}(\bm{A}\bm{B}\bm{C}) = \operatorname{tr}(\bm{B}\bm{C}\bm{A}) = \operatorname{tr}(\bm{C}\bm{A}\bm{B}).
+    \end{equation*}
+    More generally, factors inside a trace may be cyclically permuted whenever their products are well defined.
+
+    \vspace{0.5em}
+    \noindent
+    \textbf{Trivial (but important) fact:} If $\bm{A} \in \mathbb{R}^{1 \times 1}$ (i.e. $\bm{A}$ is a scalar), then $\operatorname{tr}(\bm{A}) = \bm{A}$.
+\end{theorem}
+
+\subsubsection{Matrix Notation}
+
+For observation $i$, write
+\begin{equation*}
+    X_i = (x_{i1}, \dots, x_{id})^\top \in \mathbb{R}^d
+\end{equation*}
+
+for its observed predictor vector. Collect the $n$ observations in the design matrix
+\begin{equation*}
+    X = \begin{pmatrix}
+        1 & X_1^\top \\
+        1 & X_2^\top \\
+        \vdots & \vdots \\
+        1 & X_n^\top
+    \end{pmatrix} = \begin{pmatrix}
+        1 & x_{11} & \cdots & x_{1d} \\
+        1 & x_{21} & \cdots & x_{2d} \\
+        \vdots & \vdots & \ddots & \vdots \\
+        1 & x_{n1} & \cdots & x_{nd}
+    \end{pmatrix} \in \mathbb{R}^{n \times p}, \quad p = d+1.
+\end{equation*}
+
+Define
+\begin{equation*}
+    y = (y_1, \dots, y_n)^\top, \quad \beta = (\beta_0, \beta_1, \dots, \beta_d)^\top.
+\end{equation*}
+
+Then
+\begin{equation*}
+    y = X\beta + \epsilon, \quad L_n(\beta) := \frac{1}{n} \lVert y - X\beta \rVert_2^2.
+\end{equation*}
+
+\subsection*{Solving the Least-Squares Problem}
+
+The least-squares objective function in matrix notation is:
+\begin{equation*}
+    L_n(\bm\beta) = \frac{1}{n} \|y - X\bm\beta\|_2^2 = \frac{1}{n}(y - X\bm\beta)^\top (y - X\bm\beta)
+\end{equation*}
+
+\textbf{First-order condition:} Setting the gradient with respect to $\bm\beta$ to zero:
+\begin{equation*}
+    \nabla L_n(\bm\beta) = -\frac{2}{n} X^\top (y - X\bm\beta) = \mathbf{0}
+\end{equation*}
+
+This yields the \textbf{normal equations}:
+\begin{equation*}
+    X^\top X \hat{\bm\beta} = X^\top y
+\end{equation*}
+
+\textbf{Second-order condition:} The Hessian matrix is:
+\begin{equation*}
+    \nabla^2 L_n(\bm\beta) = \frac{2}{n} X^\top X
+\end{equation*}
+
+For any non-zero vector $v \in \mathbb{R}^p$:
+\begin{equation*}
+    v^\top \nabla^2 L_n(\bm\beta) v = \frac{2}{n} \|Xv\|_2^2 \geq 0
+\end{equation*}
+
+Thus, $L_n$ is convex. If $\text{rank}(X)=p$, then $X^\top X$ is invertible and the minimiser is unique:
+\begin{equation*}
+    \hat{\bm\beta} = (X^\top X)^{-1} X^\top y
+\end{equation*}
+
+Once $\hat{\bm\beta}$ has been computed, the vector of fitted values is
+\begin{equation*}
+    \hat{\bm{y}} :=   (\hat{y}_1,\dots,\hat{y}_n)^\top=X\hat{\bm\beta}= X(X^\top X)^{-1} X^\top y
+\end{equation*}
+
+\begin{definition}[Hat Matrix] \leavevmode\\
+    The matrix
+    \begin{equation*}
+        H:=X(X^\top X)^{-1} X^\top
+    \end{equation*}
+    is called the hat matrix.
+\end{definition}
+
+Thus, the fitted values and residuals are
+\begin{equation*}
+    \hat{\bm{y}}=Hy, \quad \bm{e}:=\bm{y}-\hat{\bm{y}}=(I-H)\bm{y}
+\end{equation*}
+
+where $H$ maps the observed responses $\bm{y}$ to their fitted values $\hat{\bm{y}}$.
+
+
+\section{Geometry, Projection, and Error Analysis}
+
+\subsection{Orthogonality and Geometric Projection}
+
+\subsubsection{Design Matrix}
+
+Write the columns of the design matrix as
+\begin{equation*}
+    X = \begin{pmatrix}
+        1 & X_1^\top \\
+        \vdots & \vdots \\
+        1 & X_n^\top
+    \end{pmatrix} = (1, X_1, \dots, X_d),
+\end{equation*}
+
+where
+\begin{equation*}
+    X_j = (x_{1j}, \dots, x_{nj})^\top \in \mathbb{R}^n
+\end{equation*}
+
+is the vector containing the observed values of predictor $j$, and
+\begin{equation*}
+    1 = (1, \dots, 1)^\top \in \mathbb{R}^n,
+\end{equation*}
+
+is the intercept vector of one's.
+
+\vspace{0.5em}
+\noindent
+Every fitted response vector has the form
+\begin{equation*}
+    X\beta = \beta_0 1 + \beta_1 X_1 + \dots + \beta_d X_d
+\end{equation*}
+
+Hence, all fitted vectors lie in
+\begin{equation*}
+    \operatorname{col}(X) = \operatorname{span}\{1, X_1, \dots, X_d\} \subset \mathbb{R}^n.
+\end{equation*}
+
+If $\operatorname{rank}(X) = p = d+1$, this is a $p$-dimensional subspace of $\mathbb{R}^n$.
+
+\noindent
+There are two useful ways to read the same matrix $\bm{X}$. The \textit{Rows are the Observations}: The $i$th row is $(1,X_i^\top)=(1,x_{i1},\dots,x_{id})$, where $X_i \in \mathbb{R}^d$ contains all predictors for observation $i$. The \textit{Columns are the Variables}: The $j$th predictor column is $\bm{X}_j=(x_{1j},\dots,x_{nj})^\top \in \mathbb{R}^n$ which contains predictor $j$ across al observations. The first column $\bm{1}$ is the intercept.
+
+\subsubsection{Orthogonality of the Residual}
+The sample first-order condition (the normal equations) states
+\begin{equation*}
+    X^\top(y - X\hat{\bm\beta}) = 0
+\end{equation*}
+
+Since $\hat{\bm y} = X\hat{\bm\beta}$ and $\bm e := \bm y - \hat{\bm y}$, this becomes
+\begin{equation*}
+    X^\top \bm e = 0
+\end{equation*}
+
+Writing $X = (1, X_1, \dots, X_d)$, this is equivalent to
+\begin{equation*}
+    \bm{1}^\top \bm e = 0, \quad X_j^\top \bm e = 0, \quad j = 1,\dots,d
+\end{equation*}
+
+Thus, $\bm e$ is orthogonal to every column of $X$, and therefore to every linear combination of its columns:
+\begin{equation*}
+    \bm e \perp \operatorname{col}(X)
+\end{equation*}
+
+The least-squares residual is orthogonal to the entire space of fitted response vectors.
+
+\subsubsection{Least Squares as a Geometric Problem}
+Least squares minimises
+\begin{equation*}
+    \min_{\bm\beta \in \mathbb{R}^p} \lVert y - X\bm\beta \rVert_2^2
+\end{equation*}
+
+Since $X\bm\beta$ ranges over $\operatorname{col}(X)$, this is equivalent to
+\begin{equation*}
+    \min_{v \in \operatorname{col}(X)} \lVert y - v \rVert_2^2
+\end{equation*}
+
+So the algebraic problem has a geometric interpretation: \textit{which point in $\operatorname{col}(X)$ is closest to $y$?} The closest point is called the \textbf{orthogonal projection} of $y$ onto $\operatorname{col}(X)$. For least squares, this point is $\hat{y}$, since
+\begin{equation*}
+    \hat{y} \in \operatorname{col}(X), \quad y - \hat{y} = e \perp \operatorname{col}(X)
+\end{equation*}
+
+$\hat y$ lies in the fitted space, and the remaining error is orthogonal to that space.
+
+$\hat y = Hy \in \operatorname{col}(X)$, and $e = y - \hat y \perp \operatorname{col}(X)$. The equation $X^\top e = 0$ is exactly this orthogonality condition.
+
+\begin{theorem}[Projection Characterization of Least Squares] \leavevmode\\
+    A vector $v \in \operatorname{col}(X)$ minimises $\lVert y - u \rVert^2$ over $u \in \operatorname{col}(X)$ if and only if
+    \begin{equation*}
+        y - v \perp \operatorname{col}(X)
+    \end{equation*}
+    If $\operatorname{rank}(X) = p$, the minimiser is $v = \hat y = Hy$.
+\end{theorem}
+
+\subsubsection{Properties of the Hat Matrix}
+\begin{proposition} \leavevmode\\
+    If $\operatorname{rank}(X) = p$, then:
+    \begin{enumerate}
+        \item \textbf{Symmetry:} $H^\top = H$
+        \item \textbf{Idempotency:} $H^2 = H$
+        \item \textbf{Identity on the fitted space:} $HX = X$
+        \item \textbf{Orthogonality of fitted values and residuals:} $H(I-H) = 0$
+        \item \textbf{Rank/trace:} $\operatorname{tr}(H) = p$
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}\leavevmode
+    \begin{enumerate}
+        \item \textbf{Symmetry.} Since $X^\top X$ is symmetric, so is $(X^\top X)^{-1}$. Hence
+        \begin{equation*}
+            H^\top = \big[X(X^\top X)^{-1}X^\top\big]^\top = X\big[(X^\top X)^{-1}\big]^\top X^\top = X(X^\top X)^{-1}X^\top = H
+        \end{equation*}
+
+        \item \textbf{Idempotency.} Directly,
+        \begin{align*}
+            H^2 &= X(X^\top X)^{-1}X^\top \cdot X(X^\top X)^{-1}X^\top \\
+            &= X(X^\top X)^{-1}(X^\top X)(X^\top X)^{-1}X^\top \\
+            &= X(X^\top X)^{-1}X^\top = H
+        \end{align*}
+
+        \item \textbf{Identity on the fitted space.} Directly,
+        \begin{equation*}
+            HX = X(X^\top X)^{-1}X^\top X = X(X^\top X)^{-1}(X^\top X) = X
+        \end{equation*}
+
+        \item \textbf{Orthogonality of fitted values and residuals.} Using idempotency,
+        \begin{equation*}
+            H(I-H) = H - H^2 = H - H = 0
+        \end{equation*}
+        Equivalently, for any $y$, $(Hy)^\top(I-H)y = y^\top H^\top(I-H)y = y^\top H(I-H)y = 0$, using symmetry of $H$. So $\hat y = Hy$ and $e=(I-H)y$ are orthogonal, consistent with $e \perp \operatorname{col}(X)$.
+
+        \item \textbf{Rank/trace.} By the cyclicity of the trace (Theorem \ref{thm:tracecyc}),
+        \begin{equation*}
+            \operatorname{tr}(H) = \operatorname{tr}\big(X(X^\top X)^{-1}X^\top\big) = \operatorname{tr}\big((X^\top X)^{-1}X^\top X\big) = \operatorname{tr}(I_p) = p
+        \end{equation*}
+        Since $H$ is idempotent, its eigenvalues are only $0$ or $1$, so $\operatorname{rank}(H) = \operatorname{tr}(H) = p$.
+    \end{enumerate}
+\end{proof}
+
+\subsubsection{Decomposing Sample Variation: The Pythagorean Identity and \texorpdfstring{$R^2$}{R2}}
+
+Recall that the law of total variance:
+\begin{equation*}
+    \Var(Y) = \underbrace{\Var(\E[Y\mid X])}_{\text{explained by } X} + \underbrace{\E[\Var(Y\mid X)]}_{\text{remaining given } X}
+\end{equation*}
+
+Under the homoscedastic regression model, $\E[Y\mid X]=f(X)$ and $\Var(Y\mid X)=\sigma^2$, so
+\begin{equation*}
+    \Var(Y) = \Var(f(X)) + \sigma^2
+\end{equation*}
+
+Least squares gives a closely related \textbf{sample} decomposition. Since the model contains an intercept, $\bar{\hat y}=\bar y$, and
+\begin{equation*}
+    y - \bar y \bm{1} = (\hat y - \bar y \bm{1}) + e, \quad (\hat y - \bar y \bm{1}) \perp e
+\end{equation*}
+
+Hence, by Pythagoras,
+\begin{equation*}
+    \underbrace{\sum_{i=1}^n (y_i-\bar y)^2}_{\text{total}} = \underbrace{\sum_{i=1}^n (\hat y_i - \bar y)^2}_{\text{explained by the fitted model}} + \underbrace{\sum_{i=1}^n (y_i - \hat y_i)^2}_{\text{remaining}}
+\end{equation*}
+
+Write
+\begin{equation*}
+    \text{TSS} := \sum_{i=1}^n (y_i-\bar y)^2, \quad \text{ESS} := \sum_{i=1}^n (\hat y_i - \bar y)^2, \quad \text{RSS} := \sum_{i=1}^n (y_i - \hat y_i)^2
+\end{equation*}
+
+Then
+\begin{equation*}
+    \text{TSS} = \text{ESS} + \text{RSS}
+\end{equation*}
+
+and therefore
+\begin{equation*}
+    R^2 := \frac{\text{ESS}}{\text{TSS}} = 1 - \frac{\text{RSS}}{\text{TSS}}
+\end{equation*}
+
+Thus, $R^2$ is the fraction of the observed sample variation in $Y$ explained by the fitted linear model. $R^2$ measures in-sample fit; it is \textbf{not} a measure of out-of-sample prediction accuracy.
+
+\subsection{Bias and Variance}
+
+\subsubsection{Training and Test Error}
+Let
+\begin{equation*}
+    y_{0,i} = f(X_i) + \epsilon_{0,i}, \quad i=1,\dots,n,
+\end{equation*}
+
+be new responses at the same design points $X_1,\dots,X_n$, independent of the sample responses $y_1,\dots,y_n$. In vector form,
+\begin{equation*}
+    y_0 = f + \varepsilon_0
+\end{equation*}
+
+Define the training and in-sample prediction errors by
+\begin{equation*}
+    \text{MSE}_{\text{train}} := \frac{1}{n}\lVert y-\hat f \rVert_2^2, \quad \text{MSE}_{\text{test}} := \frac{1}{n}\lVert y_0-\hat f \rVert_2^2, \quad \hat f = Hy
+\end{equation*}
+
+\begin{align*}
+    \E[\text{MSE}_{\text{train}}] &= \frac{1}{n}\lVert (I-H)f \rVert_2^2 + \sigma^2\Big(1-\frac{p}{n}\Big), \\
+    \E[\text{MSE}_{\text{test}}] &= \frac{1}{n}\lVert (I-H)f \rVert_2^2 + \sigma^2\Big(1+\frac{p}{n}\Big).
+\end{align*}
+
+\subsubsection{Expected Training Error: Derivation}
+Since $y=f+\varepsilon$ and $\hat f = Hy$,
+\begin{equation*}
+    y-\hat f = (I-H)f + (I-H)\varepsilon
+\end{equation*}
+
+Hence,
+\begin{align*}
+    \lVert y-\hat f \rVert_2^2 &= \lVert (I-H)f \rVert_2^2 + \lVert (I-H)\varepsilon \rVert_2^2 + 2f^\top(I-H)^\top(I-H)\varepsilon \\
+    &= \lVert (I-H)f \rVert_2^2 + \lVert (I-H)\varepsilon \rVert_2^2 + 2f^\top(I-H)\varepsilon,
+\end{align*}
+
+where the last equality uses symmetry and idempotency of $H$. Using $\E[\varepsilon]=0$, the cross term has mean zero. Therefore,
+\begin{equation*}
+    \E\lVert y-\hat f \rVert_2^2 = \lVert (I-H)f \rVert_2^2 + \E\lVert (I-H)\varepsilon \rVert_2^2
+\end{equation*}
+
+It remains to calculate the second term:
+\begin{align*}
+    \E\lVert (I-H)\varepsilon \rVert_2^2 &= \E\big[\varepsilon^\top(I-H)^\top(I-H)\varepsilon\big] \\
+    &\overset{(a)}{=} \E\big[\varepsilon^\top(I-H)\varepsilon\big] \\
+    &= \E\big[\operatorname{tr}\{(I-H)\varepsilon\varepsilon^\top\}\big] \\
+    &= \operatorname{tr}\big\{(I-H)\,\E[\varepsilon\varepsilon^\top]\big\} \\
+    &\overset{(b)}{=} \sigma^2 \operatorname{tr}(I-H) \\
+    &= \sigma^2\{n-\operatorname{tr}(H)\} \\
+    &\overset{(c)}{=} \sigma^2(n-p),
+\end{align*}
+
+where (a) holds by symmetry and idempotency of $H$, (b) because $\E[\varepsilon\varepsilon^\top]=\sigma^2 I$, and (c) since $\operatorname{tr}(H)=\operatorname{rank}(H)=p$.
+
+Therefore,
+\begin{equation*}
+    \E\lVert y-\hat f \rVert_2^2 = \lVert (I-H)f \rVert_2^2 + \sigma^2(n-p),
+\end{equation*}
+
+and hence
+\begin{equation*}
+    \E[\text{MSE}_{\text{train}}] = \frac{1}{n}\lVert (I-H)f \rVert_2^2 + \sigma^2\Big(1-\frac{p}{n}\Big)
+\end{equation*}
+
+\subsubsection{Expected Test Error: Derivation}
+Recall $\E[\varepsilon_0\varepsilon_0^\top]=\E[\varepsilon\varepsilon^\top]=\sigma^2 I$. For the new-response noise,
+\begin{equation*}
+    \E\lVert \varepsilon_0 \rVert_2^2 = \E\big[\operatorname{tr}(\varepsilon_0\varepsilon_0^\top)\big] = \operatorname{tr}\big\{\E[\varepsilon_0\varepsilon_0^\top]\big\} = \sigma^2\operatorname{tr}(I) = n\sigma^2
+\end{equation*}
+
+For the estimation noise, using cyclicity of the trace,
+\begin{equation*}
+    \E\lVert H\varepsilon \rVert_2^2 = \E\big[\operatorname{tr}\{H^\top H \varepsilon\varepsilon^\top\}\big] = \operatorname{tr}\big\{H^\top H\, \E[\varepsilon\varepsilon^\top]\big\} = \sigma^2\operatorname{tr}(H^2) = \sigma^2\operatorname{tr}(H) = \sigma^2 p,
+\end{equation*}
+
+where $H^\top=H$, $H^2=H$, and $\operatorname{tr}(H)=p$. Putting everything together,
+\begin{equation*}
+    \E\lVert y_0-\hat f \rVert_2^2 = \underbrace{\lVert (I-H)f \rVert_2^2}_{\text{bias}^2} + \underbrace{n\sigma^2}_{\text{new-response noise}} + \underbrace{\sigma^2 p}_{\text{estimation variance}}
+\end{equation*}
+
+Thus,
+\begin{equation*}
+    \E[\text{MSE}_{\text{test}}] = \sigma^2 + \frac{1}{n}\lVert (I-H)f \rVert_2^2 + \frac{\sigma^2 p}{n}
+\end{equation*}
+
+\subsubsection{Bias-Variance Trade-off for Linear Least Squares}
+\begin{equation*}
+    \E[\text{MSE}_{\text{test}}] = \underbrace{\sigma^2}_{\text{irreducible}} + \underbrace{\frac{1}{n}\lVert (I-H)f \rVert_2^2}_{\text{squared bias}} + \underbrace{\frac{\sigma^2 p}{n}}_{\text{variance}}
+\end{equation*}
+
+Suppose we enlarge the linear model by adding one predictor, so that $\operatorname{col}(X_p) \subset \operatorname{col}(X_{p+1})$, and let $H_p$ and $H_{p+1}$ denote the associated hat matrices. Since least squares projects $f$ onto the corresponding column spaces,
+\begin{equation*}
+    \lVert (I-H_{p+1})f \rVert_2^2 \leq \lVert (I-H_p)f \rVert_2^2
+\end{equation*}
+
+Thus, increasing model flexibility can only decrease the squared bias. At the same time, the variance increases by
+\begin{equation*}
+    \frac{\sigma^2(p+1)}{n} - \frac{\sigma^2 p}{n} = \frac{\sigma^2}{n}
+\end{equation*}
+
+More flexibility $\implies$ bias$^2\downarrow$ but variance $\uparrow$. The U-shape arises from the competition between these two terms.
+
+\subsubsection{Why Does Flexibility Reduce Squared Bias?}
+Suppose that $\operatorname{col}(X_p) \subseteq \operatorname{col}(X_{p+1})$, and let $H_p$ and $H_{p+1}$ be the corresponding orthogonal projection matrices. Then
+\begin{equation*}
+    (I-H_p)f = (I-H_{p+1})f + (H_{p+1}-H_p)f
+\end{equation*}
+
+The two terms on the right are orthogonal, so
+\begin{equation*}
+    \lVert (I-H_p)f \rVert_2^2 = \lVert (I-H_{p+1})f \rVert_2^2 + \lVert (H_{p+1}-H_p)f \rVert_2^2
+\end{equation*}
+
+Therefore,
+\begin{equation*}
+    \lVert (I-H_{p+1})f \rVert_2^2 \leq \lVert (I-H_p)f \rVert_2^2
+\end{equation*}
+
+Enlarging the model cannot increase its in-sample squared bias. The decrease is strict exactly when
+\begin{equation*}
+    (H_{p+1}-H_p)f \neq 0,
+\end{equation*}
+
+i.e. when the new direction captures part of $f$ not already contained in $\operatorname{col}(X_p)$.
+
+
+\section{Statistical Inference and Hypothesis Testing}
+
+\subsection{Sampling Variability and Confidence Intervals}
+
+\subsubsection{Variance of the OLS Estimator}
+
+\begin{lemma}[Mean and Variance under Linear Transformations] \leavevmode\\
+    Let $y \in \mathbb{R}^n$ be a random vector with finite second moments, and let $A \in \mathbb{R}^{m\times n}$ be fixed. Then
+    \begin{equation*}
+        \E[Ay] = A\E[y], \quad \Var(Ay) = A\Var(y)A^\top
+    \end{equation*}
+\end{lemma}
+
+\begin{proof}\leavevmode\\
+    By linearity of expectation,
+    \begin{equation*}
+        \E[Ay] = A\E[y]
+    \end{equation*}
+
+    Moreover,
+    \begin{equation*}
+        Ay - \E[Ay] = A\{y-\E[y]\}
+    \end{equation*}
+
+    Hence,
+    \begin{align*}
+        \Var(Ay) &= \E\big[\{Ay-\E[Ay]\}\{Ay-\E[Ay]\}^\top\big] \\
+        &= \E\big[A\{y-\E[y]\}\{y-\E[y]\}^\top A^\top\big] \\
+        &= A\,\E\big[\{y-\E[y]\}\{y-\E[y]\}^\top\big]\,A^\top \\
+        &= A\Var(y)A^\top
+    \end{align*}
+\end{proof}
+
+\begin{definition}[Unbiased Estimators]
+\leavevmode\\
+    An estimator $\hat{\theta}$ of a parameter $\theta$ is \textbf{unbiased} if
+    \begin{equation*}
+        E[\hat{\theta}]=\theta
+    \end{equation*}
+
+    Its bias is
+    \begin{equation*}
+        \operatorname{Bias}(\hat\theta):=E[\hat\theta] - \theta
+    \end{equation*}
+
+    Thus, $\hat\theta$ is unbiased if and only if $\operatorname{Bias}(\hat\theta)=0$
+\end{definition}
+Over repeated samples, an unbiased estimator is \textbf{centered at the true parameter:} it has no systematic tendency to overestimate or underestimate $\theta$. Unbiased does not necessarily mean best: recall the bias-variance decomposition $\operatorname{MSE}(\hat\theta)=\operatorname{Bias}(\hat\theta)^2+\Var(\hat\theta)$, an estimator with some bias may have substantially smaller variance.
+
+Consider the linear model
+\begin{equation*}
+    \mathbf{y} = X\bm\beta + \varepsilon, \quad E[\varepsilon]=0, \quad \Var(\varepsilon)=\sigma^2I_n
+\end{equation*}
+where $X \in \mathbb{R}^{n \times p}$ is fixed and $\operatorname{rank}(X)=p$.
+
+\begin{theorem}[First and Second Moments of OLS] \leavevmode\\
+    The least-squares estimator $\hat{\bm\beta} =(X^\top X)^{-1}X^\top y$ satisfies
+    \begin{equation*}
+        E[\hat{\bm\beta}]= \bm\beta, \quad \Var(\hat{\bm\beta})=\sigma^2(X^\top X)^{-1}
+    \end{equation*}
+\end{theorem}
+
+\begin{itemize}
+    \item \textbf{Unbiasedness:} OLS estimates vary from sample to sample. Over repeated samples, they are centered at the true coefficients $\bm\beta$.
+    \item \textbf{Covariance:} The covariance matrix quantifies how much the OLS estimates vary across samples. Its off-diagonal entries also describe how the coefficients estimates vary together
+\end{itemize}
+
+\begin{proof}\leavevmode\\
+    Write $\hat{\bm\beta} = Ay$, where $A := (X^\top X)^{-1}X^\top$.
+
+    \textbf{Unbiasedness.} Since
+    \begin{equation*}
+        E[y] = X\bm\beta + E[\varepsilon] = X\bm\beta,
+    \end{equation*}
+    we obtain
+    \begin{equation*}
+        E[\hat{\bm\beta}] = A\,E[y] = (X^\top X)^{-1}X^\top X\bm\beta = \bm\beta
+    \end{equation*}
+
+    \textbf{Covariance.} Since $\Var(y) = \Var(\varepsilon) = \sigma^2 I_n$, the linear-transformation lemma gives
+    \begin{align*}
+        \Var(\hat{\bm\beta}) &= A\Var(y)A^\top \\
+        &= \sigma^2 (X^\top X)^{-1}X^\top X (X^\top X)^{-1} \\
+        &= \sigma^2 (X^\top X)^{-1}
+    \end{align*}
+\end{proof}
+
+The matrix $\Var(\betahat)=\sigma^2(X^\top X)^{-1}$ answers several questions at once.
+\begin{enumerate}
+    \item \textbf{Diagonal Entries:} If $v_{jj}=[(X^\top X)^{-1}]_{jj}$ then $\Var(\hat\beta_j)=\sigma^2v_{jj}$. \\ Every usual coefficient standard error estimate $\sigma\sqrt{v_{jj}}$.
+    \item \textbf{Off-diagonal Entries:} $\Cov(\hat\beta_j,\hat\beta_k) = \sigma^2[(X^\top X)^{-1}]_{jk}$
+    \\The coefficient estimates are generally correlated; they are uncorrelated when the relevant columns of X are orthogonal.
+\end{enumerate}
+
+
+
+
+
+
+
+
+\subsubsection{The Gauss-Markov Theorem}
+
+\subsubsection{Confidence Intervals via the t-Pivot}
+
+\subsubsection{Prediction Intervals}
+
+\subsection{Testing a Single Coefficient (t-Test)}
+
+\subsubsection{The Null Hypothesis for a Single Predictor}
+
+\subsubsection{The t-Test}
+
+\subsection{Testing Multiple Coefficients (F-Test)}
+
+\subsubsection{The Global F-Test}
+
+\subsubsection{The Partial F-Test}
+
+\subsubsection{The Frisch-Waugh-Lovell Theorem}
+
+\section{Extending the Linear Model}
+
+\subsection{Qualitative Predictors}
+
+\subsubsection{Dummy Variables and Baseline Coding}
+
+\subsection{Interactions}
+
+\subsubsection{Removing the Additivity Assumption}
+
+\section{Regression Diagnostics}
+
+\subsection{The Mean and Error Models}
+
+\subsubsection{Diagnosing Non-linearity via Residual Plots}
+
+\subsubsection{Correlated Errors}
+
+\subsubsection{Heteroscedasticity and Weighted Least Squares}
+
+\subsection{Unusual Observations}
+
+\subsubsection{Outliers and Studentized Residuals}
+
+\subsubsection{High-Leverage Points}
+
+\subsection{Unstable Design and Non-Gaussian Errors}
+
+\subsubsection{Collinearity and the Variance Inflation Factor}
+
+\subsubsection{Checking Normality via Q-Q Plots}

@@ -798,50 +798,349 @@ where $X \in \mathbb{R}^{n \times p}$ is fixed and $\operatorname{rank}(X)=p$.
     \end{equation*}
 \end{theorem}
 
-\begin{itemize}
-    \item \textbf{Unbiasedness:} OLS estimates vary from sample to sample. Over repeated samples, they are centered at the true coefficients $\bm\beta$.
-    \item \textbf{Covariance:} The covariance matrix quantifies how much the OLS estimates vary across samples. Its off-diagonal entries also describe how the coefficients estimates vary together
-\end{itemize}
-
-\begin{proof}\leavevmode\\
-    Write $\hat{\bm\beta} = Ay$, where $A := (X^\top X)^{-1}X^\top$.
-
-    \textbf{Unbiasedness.} Since
-    \begin{equation*}
-        E[y] = X\bm\beta + E[\varepsilon] = X\bm\beta,
-    \end{equation*}
-    we obtain
-    \begin{equation*}
-        E[\hat{\bm\beta}] = A\,E[y] = (X^\top X)^{-1}X^\top X\bm\beta = \bm\beta
-    \end{equation*}
-
-    \textbf{Covariance.} Since $\Var(y) = \Var(\varepsilon) = \sigma^2 I_n$, the linear-transformation lemma gives
-    \begin{align*}
-        \Var(\hat{\bm\beta}) &= A\Var(y)A^\top \\
-        &= \sigma^2 (X^\top X)^{-1}X^\top X (X^\top X)^{-1} \\
-        &= \sigma^2 (X^\top X)^{-1}
-    \end{align*}
-\end{proof}
-
-The matrix $\Var(\betahat)=\sigma^2(X^\top X)^{-1}$ answers several questions at once.
+The matrix $\Var(\hat{\bm\beta})=\sigma^2(X^\top X)^{-1}$ answers several questions at once.
 \begin{enumerate}
     \item \textbf{Diagonal Entries:} If $v_{jj}=[(X^\top X)^{-1}]_{jj}$ then $\Var(\hat\beta_j)=\sigma^2v_{jj}$. \\ Every usual coefficient standard error estimate $\sigma\sqrt{v_{jj}}$.
     \item \textbf{Off-diagonal Entries:} $\Cov(\hat\beta_j,\hat\beta_k) = \sigma^2[(X^\top X)^{-1}]_{jk}$
     \\The coefficient estimates are generally correlated; they are uncorrelated when the relevant columns of X are orthogonal.
 \end{enumerate}
 
+The noise level enters through $\sigma^2$, while $(X^\top X)^{-1}$ reflects the observed predictor values. More variation in the predictors generally makes their effects easier to distinguish and estimate precisely; little variation makes estimation less precise. This leaves $\sigma^2$ as the only unknown component. \newline
 
+Consider the linear model
+\begin{equation*}
+    \mathbf{y} = X\bm\beta + \varepsilon, \quad E[\varepsilon]=0, \quad \Var(\varepsilon)=\sigma^2I_n
+\end{equation*}
+where $X \in \mathbb{R}^{n \times p}$ is fixed and $\operatorname{rank}(X)=p$.
 
+\begin{theorem}[Unbiased estimator of $\sigma^2$] \leavevmode\\
+    Under the standing assumptions,
+    \begin{equation*}
+        s^2:= \frac{RSS}{n-p}=\frac{\lVert(I-H)\mathbf{y}\rVert_2^2}{n-p}
+    \end{equation*}
+    satisfies
+    \begin{equation*}
+        E[s^2]=\sigma^2
+    \end{equation*}
+    Its square root is called the \textbf{residual standard error}.
+\end{theorem}
 
+\begin{proof}\leavevmode\\
+    Since $(I-H)X=0$, the residual vector satisfies
+    \begin{equation*}
+        e = (I-H)\mathbf{y} = (I-H)(X\bm\beta+\varepsilon) = (I-H)\varepsilon
+    \end{equation*}
 
+    Therefore,
+    \begin{equation*}
+        \text{RSS} = \lVert e \rVert_2^2 = \lVert (I-H)\varepsilon \rVert_2^2
+    \end{equation*}
 
-
+    Using the same calculation as before,
+    \begin{equation*}
+        \E[\text{RSS}] = \sigma^2\operatorname{tr}(I-H) = \sigma^2\{n-\operatorname{tr}(H)\} = \sigma^2(n-p),
+    \end{equation*}
+    since $\operatorname{tr}(H)=p$. Hence
+    \begin{equation*}
+        \E[s^2] = \frac{\E[\text{RSS}]}{n-p} = \sigma^2
+    \end{equation*}
+\end{proof}
 
 \subsubsection{The Gauss-Markov Theorem}
+Consider the linear model
+\begin{equation*}
+    \mathbf{y} = X\bm\beta + \varepsilon, \quad E[\varepsilon]=0, \quad \Var(\varepsilon)=\sigma^2I_n
+\end{equation*}
+where $X \in \mathbb{R}^{n \times p}$ is fixed and $\operatorname{rank}(X)=p$.
+\begin{theorem}[Gauss-Markov Theorem] \leavevmode\\
+    Let $c \in \mathbb{R}^p$. Among all \textbf{linear unbiased estimators}
+    \begin{equation*}
+        a^\top \mathbf{y} = \sum_{i=1}^{n}a_iY_i, \quad a \in \mathbb{R}^n
+    \end{equation*}
+    of $c^\top \bm\beta$, the least-squares estimator $c^\top \betahat$ has the smallest variance.
+\end{theorem}
+
+Recall that $\thetahat$ is an unbiased estimate for $\theta$ if $E[\thetahat]=\theta$. Taking $c=e_j$, the $j$th standard basis vector, shows that no linear unbiased estimator of $\beta_j$ has smaller variance than $\hat\beta_j$. \textit{Least squares is the Best Linear Unbiased Estimator (BLUE)}.
+
+\begin{proof}\leavevmode\\
+    Let $a^\top y$ be any linear unbiased estimator of $c^\top\bm\beta$. Since
+    \begin{equation*}
+        \E[a^\top y] = a^\top X\bm\beta,
+    \end{equation*}
+    unbiasedness for every $\bm\beta \in \mathbb{R}^p$ requires
+    \begin{equation*}
+        (X^\top a - c)^\top \bm\beta = 0 \quad \text{for every } \bm\beta
+    \end{equation*}
+
+    If $X^\top a - c \neq 0$, choosing $\bm\beta = X^\top a - c$ gives
+    \begin{equation*}
+        0 = \lVert X^\top a - c \rVert_2^2 > 0,
+    \end{equation*}
+    a contradiction. Hence, $X^\top a = c$.
+
+    The OLS estimator can be written as
+    \begin{equation*}
+        c^\top\hat{\bm\beta} = a_{\text{OLS}}^\top y, \quad a_{\text{OLS}} := X(X^\top X)^{-1}c
+    \end{equation*}
+
+    For any competing $a$, write $d := a - a_{\text{OLS}}$. Then,
+    \begin{equation*}
+        X^\top d = X^\top a - c = 0
+    \end{equation*}
+
+    Using the definition of $a_{\text{OLS}}$,
+    \begin{equation*}
+        a_{\text{OLS}}^\top d = c^\top(X^\top X)^{-1}X^\top d = 0
+    \end{equation*}
+
+    Therefore,
+    \begin{equation*}
+        \lVert a \rVert_2^2 = \lVert a_{\text{OLS}} + d \rVert_2^2 = \lVert a_{\text{OLS}} \rVert_2^2 + \lVert d \rVert_2^2
+    \end{equation*}
+
+    Finally, since $\Var(y) = \sigma^2 I_n$,
+    \begin{align*}
+        \Var(a^\top y) &= \sigma^2\lVert a \rVert_2^2 \\
+        &= \sigma^2\lVert a_{\text{OLS}} \rVert_2^2 + \sigma^2\lVert d \rVert_2^2 \\
+        &\geq \sigma^2\lVert a_{\text{OLS}} \rVert_2^2 \\
+        &= \Var(a_{\text{OLS}}^\top y) \\
+        &= \Var(c^\top\hat{\bm\beta})
+    \end{align*}
+\end{proof}
+
+Each of the three qualifiers is doing work. \textbf{Best} refers to variance only. Among unbiased estimators this is the same as mean squared error, but no further. \textbf{Linear} means linear in $\mathbf{y}$. Non-linear estimators are not covered. \textbf{Unbiased} is a genuine restriction and one worth questioning. Recall that $\text{MSE} = \text{Bias}^2 + \Var$. Gauss-Markov fixes the first term at zero and minimises the second. Nothing says this minimises the sum. Accepting a little bias can buy a large reduction in variance.
+
+\subsubsection{Maximum Likelihood under Gaussian Errors}
+
+\begin{definition}[Maximum Likelihood Principle]\leavevmode\\
+    Given a dataset, choose the parameter(s) of interest in such a way that the data are most likely.
+\end{definition}
+
+\begin{definition}[Likelihood Function] \leavevmode\\
+    Suppose that the random sample $X_1,\dots,X_n$ has joint pdf or pmf
+    \begin{equation*}
+        f(x_1,\dots,x_n;\theta_1,\dots,\theta_m) \equiv f(\mathbf{x};\bm\theta)
+    \end{equation*}
+    Define the \textbf{likelihood function} as
+    \begin{equation*}
+        L(\bm\theta) := L(\theta_1,\dots,\theta_m) = f(x_1,\dots,x_n;\theta_1,\dots,\theta_m)
+    \end{equation*}
+    This function shows how likely it is to observe the data set $x_1,\dots,x_n$. For a random sample from pdf (or pmf) $f(x;\bm\theta)$,
+    \begin{equation*}
+        L(\bm\theta) = \prod_{i=1}^n f(x_i;\bm\theta) = f(x_1;\bm\theta)f(x_2;\bm\theta)\cdots f(x_n;\bm\theta)
+    \end{equation*}
+    Density and likelihood are two sides of the same coin: density regards $f(x;\bm\theta)$ as a function of $x$ with known $\bm\theta$ (probability); likelihood regards $f(x;\bm\theta)$ as a function of $\bm\theta$ while the data $x$ is given (statistics).
+\end{definition}
+
+\begin{definition}[Maximum Likelihood Estimator] \leavevmode\\
+    Let $x_1,\dots,x_n$ be a realization of a random sample with joint pdf or pmf $f(\cdot;\bm\theta)$. The \textbf{maximum likelihood estimate (MLE)} of $\bm\theta \in \Theta$ is the maximizer $\hat{\bm\theta}$ of the likelihood function $L(\bm\theta)$, i.e.
+    \begin{equation*}
+        \hat{\bm\theta} = \operatorname*{arg\,max}_{\bm\theta \in \Theta} L(\bm\theta)
+    \end{equation*}
+    The same notation denotes the likelihood function evaluated at a realized data set $x_1,\dots,x_n$ and at a random sample $X_1,\dots,X_n$: the \textbf{maximum likelihood estimator} is the maximizer of $L(\bm\theta)$ evaluated at $X_1,\dots,X_n$.
+
+    The MLE $\hat{\bm\theta}$ is also the maximizer of the \textbf{log-likelihood},
+    \begin{equation*}
+        \hat{\bm\theta} = \operatorname*{arg\,max}_{\bm\theta \in \Theta} \log L(\bm\theta)
+    \end{equation*}
+\end{definition}
+
+Assume now, in addition, that $\varepsilon \sim N(0,\sigma^2 I_n)$, equivalently $\mathbf{y} \sim N(X\bm\beta,\sigma^2 I_n)$. The likelihood is
+\begin{equation*}
+    L(\bm\beta,\sigma^2) = \prod_{i=1}^n \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left\{-\frac{(y_i-X_i^\top\bm\beta)^2}{2\sigma^2}\right\}
+\end{equation*}
+
+Thus
+\begin{equation*}
+    \ell(\bm\beta,\sigma^2) = -\frac{n}{2}\log(2\pi) - \frac{n}{2}\log\sigma^2 - \frac{1}{2\sigma^2}\lVert \mathbf{y}-X\bm\beta \rVert_2^2
+\end{equation*}
+
+For fixed $\sigma^2$, maximising $\ell$ in $\bm\beta$ is exactly the same as minimising squared error:
+\begin{equation*}
+    \hat{\bm\beta}_{\text{MLE}} = \hat{\bm\beta}_{\text{OLS}} = (X^\top X)^{-1}X^\top \mathbf{y}
+\end{equation*}
+
+Substituting $\hat{\bm\beta}$ and differentiating in $\sigma^2$,
+\begin{equation*}
+    \frac{\partial \ell}{\partial \sigma^2} = -\frac{n}{2\sigma^2} + \frac{\text{RSS}}{2\sigma^4} = 0,
+\end{equation*}
+so
+\begin{equation*}
+    \hat\sigma^2_{\text{MLE}} = \frac{\text{RSS}}{n}
+\end{equation*}
+
+But $\E[\text{RSS}]=\sigma^2(n-p)$, hence
+\begin{equation*}
+    \E[\hat\sigma^2_{\text{MLE}}] = \frac{n-p}{n}\sigma^2 < \sigma^2
+\end{equation*}
+
+Thus the MLE of $\sigma^2$ is biased downward. In contrast, $s^2 = \text{RSS}/(n-p)$ is unbiased and is the variance estimate used in the usual regression standard errors.
+
+\subsubsection{Adding Normality}
+Consider the linear model
+\begin{equation*}
+    \mathbf{y} = X\bm\beta + \varepsilon, \quad \varepsilon \sim N(0,\sigma^2 I_n),
+\end{equation*}
+where $X \in \mathbb{R}^{n \times p}$ is fixed and $\operatorname{rank}(X)=p$. The normality assumption gives us the exact sampling distributions needed for classical statistical inference.
+
+\begin{result}[Distribution Theory for the Linear Model] \leavevmode\\
+    \begin{enumerate}
+        \item $\hat{\bm\beta} \sim N\big(\bm\beta,\, \sigma^2(X^\top X)^{-1}\big)$
+        \item $\dfrac{\text{RSS}}{\sigma^2} = \dfrac{(n-p)s^2}{\sigma^2} \sim \chi^2_{n-p}$
+        \item $\hat{\bm\beta}$ and $\text{RSS}$ are independent.
+    \end{enumerate}
+    We will use these results without proof. Their proofs are topics in theoretical statistics courses.
+\end{result}
 
 \subsubsection{Confidence Intervals via the t-Pivot}
+Let $v_{jj} := [(X^\top X)^{-1}]_{jj}$. Then
+\begin{equation*}
+    \frac{\hat\beta_j - \beta_j}{\sigma\sqrt{v_{jj}}} \sim N(0,1)
+\end{equation*}
+
+Since $\sigma$ is unknown, replace it by
+\begin{equation*}
+    s = \sqrt{\frac{\text{RSS}}{n-p}}
+\end{equation*}
+
+Independence of $\hat{\bm\beta}$ and $s^2$ gives:
+
+\begin{result}[The t-Pivot] \leavevmode\\
+    \begin{equation*}
+        \frac{\hat\beta_j - \beta_j}{SE(\hat\beta_j)} \sim t_{n-p}, \quad SE(\hat\beta_j) = s\sqrt{v_{jj}},
+    \end{equation*}
+    where $t_{n-p}$ denotes the t-distribution with $n-p$ degrees of freedom.
+\end{result}
+
+This result will give us both confidence intervals and hypothesis tests. \newline
+
+A point estimate such as $\hat\beta_j$ gives one estimate of the unknown coefficient $\beta_j$, but it changes from sample to sample.
+
+\begin{definition}[Confidence Interval]\leavevmode\\
+    A $(1-\alpha)$ confidence interval is a random interval
+    \begin{equation*}
+        C(\mathbf{y})=[L(\mathbf{y}),U(\mathbf{y})]
+    \end{equation*}
+    constructed so that
+    \begin{equation*}
+        P\{\beta_j \in C(\mathbf{y})\} = 1 - \alpha
+    \end{equation*}
+\end{definition}
+
+This probability refers to \textit{repeated sampling}: if we repeatedly collected new data and constructed the interval in the same way, a proportion $1-\alpha$ of the intervals would contain the true coefficient. Once the data has been observed, the interval is fixed and $\beta_j$ is fixed: the interval either contains $\beta_j$ or not. \newline
+
+From
+\begin{equation*}
+    \frac{\hat\beta_j - \beta_j}{SE(\hat\beta_j)} \sim t_{n-p},
+\end{equation*}
+we have
+\begin{equation*}
+    P\left(-t_{n-p,1-\alpha/2} \leq \frac{\hat\beta_j - \beta_j}{SE(\hat\beta_j)} \leq t_{n-p,1-\alpha/2}\right) = 1-\alpha
+\end{equation*}
+
+Rearranging gives:
+
+\begin{result}[Confidence Interval for $\beta_j$] \leavevmode\\
+    \begin{equation*}
+        \hat\beta_j \pm t_{n-p,1-\alpha/2}\,SE(\hat\beta_j),
+    \end{equation*}
+    where $t_{n-p,1-\alpha/2}$ is the $1-\alpha/2$ quantile of the t-distribution with $n-p$ degrees of freedom.
+\end{result}
+
+At a new predictor vector $\mathbf{x}_0$, the conditional mean is
+\begin{equation*}
+    \mu_0 := \E[Y_0 \mid \mathbf{x}_0] = \mathbf{x}_0^\top \bm\beta,
+\end{equation*}
+estimated by
+\begin{equation*}
+    \hat\mu_0 = \mathbf{x}_0^\top \hat{\bm\beta}
+\end{equation*}
+
+Its estimation error is
+\begin{equation*}
+    \hat\mu_0 - \mu_0 = \mathbf{x}_0^\top(\hat{\bm\beta}-\bm\beta)
+\end{equation*}
+
+Therefore
+\begin{align*}
+    \Var(\hat\mu_0 - \mu_0) &= \mathbf{x}_0^\top \Var(\hat{\bm\beta})\, \mathbf{x}_0 \\
+    &= \sigma^2 \mathbf{x}_0^\top (X^\top X)^{-1} \mathbf{x}_0
+\end{align*}
+
+\begin{result}[Confidence Interval for $\mu_0$] \leavevmode\\
+    \begin{equation*}
+        \hat\mu_0 \pm t_{n-p,1-\alpha/2}\, s\sqrt{\mathbf{x}_0^\top (X^\top X)^{-1} \mathbf{x}_0}
+    \end{equation*}
+\end{result}
 
 \subsubsection{Prediction Intervals}
+
+Suppose we observe a new predictor vector $\mathbf{x}_0$ and we want to predict a \textit{future response}
+
+\begin{equation*}
+    Y_0=\mathbf{x}_0^\top \bm\beta+\varepsilon_0
+\end{equation*}
+
+Unlike the mean response
+\begin{equation*}
+    \mu_0 := \E[Y_0 \mid \mathbf{x}_0] = \mathbf{x}_0^\top \bm\beta,
+\end{equation*}
+
+the future response $Y_0$ is itself random.
+
+\begin{definition}[Prediction Interval]\leavevmode\\
+    A $(1-\alpha)$ prediction interval is a random interval
+    \begin{equation*}
+        P(\mathbf{y}, \mathbf{x}_0)=[L(\mathbf{y}, \mathbf{x}_0),U(\mathbf{y}, \mathbf{x}_0)]
+    \end{equation*}
+    constructed so that
+    \begin{equation*}
+        P\{Y_0 \in P(\mathbf{y}, \mathbf{x}_0)\}=1-\alpha
+    \end{equation*}
+\end{definition}
+
+There are now two sources of uncertainty: uncertainty about $\bm\beta$ (estimation uncertainty) and $\varepsilon_0$ (irreducible future noise). \newline
+
+A future response at $\mathbf{x}_0$ is
+\begin{equation*}
+    Y_0 = \mathbf{x}_0^\top \bm\beta + \varepsilon_0, \quad \varepsilon_0 \perp\!\!\!\perp (\mathbf{y},\hat{\bm\beta}), \quad \Var(\varepsilon_0)=\sigma^2
+\end{equation*}
+
+Its prediction error is
+\begin{equation*}
+    Y_0 - \hat\mu_0 = \varepsilon_0 - \mathbf{x}_0^\top(\hat{\bm\beta}-\bm\beta)
+\end{equation*}
+
+The two terms are independent, so
+\begin{align*}
+    \Var(Y_0-\hat\mu_0) &= \Var(\varepsilon_0) + \Var\{\mathbf{x}_0^\top(\hat{\bm\beta}-\bm\beta)\} \\
+    &= \sigma^2\big(1+\mathbf{x}_0^\top(X^\top X)^{-1}\mathbf{x}_0\big)
+\end{align*}
+
+\begin{result}[Prediction Interval for $Y_0$] \leavevmode\\
+    \begin{equation*}
+        \hat\mu_0 \pm t_{n-p,1-\alpha/2}\, s\sqrt{1+\mathbf{x}_0^\top (X^\top X)^{-1} \mathbf{x}_0}
+    \end{equation*}
+\end{result}
+
+For the Advertising data (sales on TV and radio), at $\text{TV}=\$100{,}000$ and $\text{radio}=\$20{,}000$, both intervals are centred at $\hat\mu_0 = 11.256$, but
+\begin{equation*}
+    95\%\text{ CI for the mean response} = [10.985, 11.528],
+\end{equation*}
+whereas
+\begin{equation*}
+    95\%\text{ PI for a new response} = [7.930, 14.583]
+\end{equation*}
+
+The prediction interval is much wider because it includes both the uncertainty in estimating $\mu_0$ (the $\mathbf{x}_0^\top(X^\top X)^{-1}\mathbf{x}_0$ term) and fresh outcome noise (the extra $1$). The extra $1$ is irreducible uncertainty about the future observation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{img/confpredbands.png}
+\end{figure}
+The confidence band is narrowest near the centre of the design, where $\mathbf{x}_0^\top(X^\top X)^{-1}\mathbf{x}_0$ is smallest. The prediction band is much wider because the irreducible $\sigma^2$ term dominates. Both formulas describe uncertainty under the fitted model; extrapolation far outside the observed predictor range is especially risky.
+
+
 
 \subsection{Testing a Single Coefficient (t-Test)}
 
